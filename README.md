@@ -2,13 +2,13 @@
 ## Описание
 3D платформер с элементами 2D платформера. Суть совмещения 3D и 2D заключается в том, что игрок может использовать внутриигровые зеркала, чтобы переходить в режим 2D платформера и перемещаться по отражениям объектов. После выхода из 2D режима игрок перемещается в то место, где он находился в 2D режиме. 
 ## Скриншоты
-[Вид при активации 2D режима](https://github.com/xxavierr404/reflexia/blob/main/screenshots/screenshot1.png)
+[Вид при активации 2D режима](/screenshots/screenshot1.png?raw=true)
 
-[Внутриигровое зеркало](https://github.com/xxavierr404/reflexia/blob/main/screenshots/screenshot2.png)
+[Внутриигровое зеркало](/screenshots/screenshot2.png?raw=true)
 
-[Перемещение в 2D режиме](https://github.com/xxavierr404/reflexia/blob/main/screenshots/screenshot3.png)
+[Перемещение в 2D режиме](/screenshots/screenshot3.png?raw=true)
 
-[Местоположение игрока после выхода из 2D режима](https://github.com/xxavierr404/reflexia/blob/main/screenshots/screenshot4.png)
+[Местоположение игрока после выхода из 2D режима](/screenshots/screenshot4.png?raw=true)
 
 ## Инструкция по запуску
 Для запуска требуется 64-битная ОС Windows.
