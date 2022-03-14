@@ -86,7 +86,7 @@ public class GameManager : MonoBehaviour
                 usingPortableMirror = true;
             }
             Physics.IgnoreLayerCollision(7, 9);
-            focus = StartCoroutine(Utilities.Focus(camTransform, mirror.transform, 0.5f));
+            focus = StartCoroutine(Utilities.Focus(camTransform, mirror.transform));
             StartCoroutine(Utilities.LerpRotation(camTransform, mirror.transform, 2.0f));
             gameMode = true;
         }

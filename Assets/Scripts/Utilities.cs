@@ -4,14 +4,9 @@ using UnityEngine;
 public static class Utilities
 {
     public static Vector3 dampVelocity;
-    public static IEnumerator Focus(Transform from, Transform to, float duration)
+    public static IEnumerator Focus(Transform from, Transform to)
     {
-        Vector3 targetPos = to.TransformPoint(Vector3.back * 12);
-        while (Vector3.Distance(from.position, targetPos) > 0.1f)
-        {
-            from.position = Vector3.SmoothDamp(from.position, targetPos, ref dampVelocity, duration);
-            yield return null;
-        }
+        Vector3 targetPos;
         while (true)
         {
             targetPos = to.TransformPoint(Vector3.back * 12);
