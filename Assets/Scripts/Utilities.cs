@@ -6,7 +6,7 @@ public static class Utilities
     public static Vector3 dampVelocity;
     public static IEnumerator Focus(Transform from, Transform to, float duration)
     {
-        Vector3 targetPos = to.TransformPoint(Vector3.back * 10);
+        Vector3 targetPos = to.TransformPoint(Vector3.back * 12);
         while (Vector3.Distance(from.position, targetPos) > 0.1f)
         {
             from.position = Vector3.SmoothDamp(from.position, targetPos, ref dampVelocity, duration);
@@ -14,9 +14,9 @@ public static class Utilities
         }
         while (true)
         {
-            targetPos = to.TransformPoint(Vector3.back * 10);
-            from.position = Vector3.SmoothDamp(from.position, targetPos, ref dampVelocity, 0.5f);
-            yield return new WaitForEndOfFrame();
+            targetPos = to.TransformPoint(Vector3.back * 12);
+            from.position = Vector3.SmoothDamp(from.position, targetPos, ref dampVelocity, 0.3f);
+            yield return null;
         }
     }
     public static IEnumerator LerpPosition(Transform from, Vector3 targetPos, float duration)

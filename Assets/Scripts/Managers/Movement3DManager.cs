@@ -16,13 +16,15 @@ public class Movement3DManager : MonoBehaviour
     {
         if (!player) player = Player.GetPlayer();
         camTransform = GameManager.camTransform;
+        Debug.DrawRay(player.transform.position, player.transform.forward);
         if (move.magnitude >= 0.1f)
         {
             player.anim.SetBool("Running", true);
             float targetAngle = RotatePlayer(move.x, move.z); //Вращение модели игрока при передвижении
             move = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
             var velocity = player.rigidBody.velocity;
-            player.rigidBody.AddForce(move * player.speed - new Vector3(velocity.x, 0, velocity.z), ForceMode.VelocityChange); //Движение с постоянной скоростью
+            if(!Physics.Raycast(player.transform.position, player.transform.forward, 1f, ~(1 << 8)))
+                player.rigidBody.AddForce(move * player.speed - new Vector3(velocity.x, 0, velocity.z), ForceMode.VelocityChange); //Движение с постоянной скоростью
         }
         else player.anim.SetBool("Running", false);
         if (GameManager.mirror)

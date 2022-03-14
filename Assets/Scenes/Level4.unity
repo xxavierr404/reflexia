@@ -740,7 +740,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 435245921}
-  m_LocalRotation: {x: 0.023753027, y: 0.62532157, z: -0.01904821, w: 0.779773}
+  m_LocalRotation: {x: 0.023753028, y: 0.62532157, z: -0.019048212, w: 0.779773}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -2645,10 +2645,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -0.593
       objectReference: {fileID: 0}
-    - target: {fileID: 2480262038831597703, guid: 16e985e9e94356a409044798fb1614cb, type: 3}
-      propertyPath: m_Material
-      value: 
-      objectReference: {fileID: 13400000, guid: 4123c96786eccc34893df1ba693bf288, type: 2}
     - target: {fileID: 6137983899780626100, guid: 16e985e9e94356a409044798fb1614cb, type: 3}
       propertyPath: m_Name
       value: Ladder
