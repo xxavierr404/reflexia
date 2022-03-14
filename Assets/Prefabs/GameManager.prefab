@@ -53,6 +53,7 @@ MonoBehaviour:
   allowTimeRewind: 0
   mirrorEnterSFX: {fileID: 8300000, guid: 22acaed7ca74d6d4c8c26036ebe42bd0, type: 3}
   mirrorExitSFX: {fileID: 8300000, guid: 1047e37272231174c8e82032603bc2b5, type: 3}
+  failedToSwitch: {fileID: 8300000, guid: 2876e7fa4419a4a7096b8bb38641daa3, type: 3}
 --- !u!114 &7073124978661676701
 MonoBehaviour:
   m_ObjectHideFlags: 0

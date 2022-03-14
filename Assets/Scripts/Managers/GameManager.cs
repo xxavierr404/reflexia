@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private bool allowTimeRewind;
     [SerializeField] private AudioClip mirrorEnterSFX;
     [SerializeField] private AudioClip mirrorExitSFX;
+    [SerializeField] private AudioClip failedToSwitch;
 
     private Player player; //Игрок
     public static GameObject mirror; //Объект ближайшего найденного зеркала
@@ -60,7 +61,7 @@ public class GameManager : MonoBehaviour
             mirrorCam = null;
             isVisible = false;
         }
-        if ((Input.GetKeyDown(KeyCode.Q) && isVisible && allowSwitchingGameMode) || (gameMode && !isVisible))
+        if ((allowSwitchingGameMode && Input.GetKeyDown(KeyCode.Q) && isVisible && !Physics.Raycast(mirrorCam.position, player.transform.position - mirrorCam.position, activeMirrorsDistance, 1 << 9)) || (gameMode && !isVisible))
         {
             if (ObjectHolder.Movable != null)
             {
@@ -68,6 +69,7 @@ public class GameManager : MonoBehaviour
             }
             else SwitchGameMode();
         }
+        else if (Input.GetKeyDown(KeyCode.Q)) audioPlayer.PlayOneShot(failedToSwitch);
         if (Input.GetKeyDown(KeyCode.R) && gameMode && allowTimeRewind) StartCoroutine(TimeShift());
     }
     public void SwitchGameMode()

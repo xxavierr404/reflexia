@@ -83,6 +83,6 @@ public static class Utilities
 
     public static bool IsGrounded(Transform objectToCheck)
     {
-        return Physics.Raycast(objectToCheck.position, -Vector3.up, 1.05f, ~LayerMask.GetMask("MirrorIgnore", "PlayerReflection"));
+        return Physics.Raycast(objectToCheck.position, -Vector3.up, 1.05f, ~LayerMask.GetMask("PlayerReflection"));
     }
 }
