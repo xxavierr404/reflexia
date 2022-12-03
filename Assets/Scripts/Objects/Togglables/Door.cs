@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Door : Togglable
@@ -8,12 +6,12 @@ public class Door : Togglable
     [SerializeField] private bool alreadyOpen;
     [SerializeField] private float durationIn;
     [SerializeField] private float durationOut;
-
-    private Coroutine slideCoroutine;
-    private Vector3 initialPosition;
     private Vector3 direction;
+    private Vector3 initialPosition;
 
     private bool isOpen;
+
+    private Coroutine slideCoroutine;
 
     private void Awake()
     {
@@ -26,19 +24,18 @@ public class Door : Togglable
     {
         if (slideCoroutine != null) StopCoroutine(slideCoroutine);
         if (isOpen)
-        {
             Close();
-        } else
-        {
+        else
             Open();
-        }
         isOpen = !isOpen;
     }
 
     public void Open()
     {
-        slideCoroutine = StartCoroutine(Utilities.LerpPosition(transform, initialPosition + slideLength * direction, durationOut));
+        slideCoroutine =
+            StartCoroutine(Utilities.LerpPosition(transform, initialPosition + slideLength * direction, durationOut));
     }
+
     public void Close()
     {
         slideCoroutine = StartCoroutine(Utilities.LerpPosition(transform, initialPosition, durationIn));

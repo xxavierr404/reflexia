@@ -3,40 +3,21 @@ using UnityEngine;
 // ReSharper disable once CheckNamespace
 public class ObjectHolder : MonoBehaviour
 {
-    public Transform Movable { get; private set; }
     private bool _moving;
-    
+    public Transform Movable { get; private set; }
+
     private void Awake()
     {
         Movable = null;
         _moving = false;
     }
-    
+
     private void Update()
     {
         if (_moving)
         {
-            float scroll = Input.GetAxis("Mouse ScrollWheel");
-            if (scroll > 0.1f)
-            {
-                Movable.Rotate(new Vector3(0, scroll * 45, 0));
-            }
-        }
-    }
-
-    public void ToggleHold()
-    {
-        if (GameManager.gameMode == true)
-        {
-            return;
-        }
-        if (_moving)
-        {
-            StopHolding();
-        }
-        else if (Movable)
-        {
-            Hold();
+            var scroll = Input.GetAxis("Mouse ScrollWheel");
+            if (scroll > 0.1f) Movable.Rotate(new Vector3(0, scroll * 45, 0));
         }
     }
 
@@ -48,6 +29,14 @@ public class ObjectHolder : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         Movable = null;
+    }
+
+    public void ToggleHold()
+    {
+        if (GameManager.gameMode == GameMode.TwoD) return;
+        if (_moving)
+            StopHolding();
+        else if (Movable) Hold();
     }
 
     private void Hold()

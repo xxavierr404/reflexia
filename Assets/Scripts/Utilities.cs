@@ -3,17 +3,19 @@ using UnityEngine;
 
 public static class Utilities
 {
-    public static Vector3 dampVelocity;
+    public static Vector3 DampVelocity;
+    public const short FramesDelay = 5;
+
     public static IEnumerator Focus(Transform from, Transform to)
     {
-        Vector3 targetPos;
-        while (true)
+        while (Vector3.Distance(from.position, to.position) > 0.1f)
         {
-            targetPos = to.TransformPoint(Vector3.back * 12);
-            from.position = Vector3.SmoothDamp(from.position, targetPos, ref dampVelocity, 0.3f);
+            var targetPos = to.TransformPoint(Vector3.back * 12);
+            from.position = Vector3.SmoothDamp(from.position, targetPos, ref DampVelocity, 0.3f);
             yield return null;
         }
     }
+
     public static IEnumerator LerpPosition(Transform from, Vector3 targetPos, float duration)
     {
         while (Vector3.Distance(from.position, targetPos) > 0.1f)
@@ -47,29 +49,27 @@ public static class Utilities
 
     public static Texture2D ToTexture2D(RenderTexture rTex)
     {
-        Texture2D tex = new Texture2D(1024, 1024, TextureFormat.RGB24, false);
+        var tex = new Texture2D(1024, 1024, TextureFormat.RGB24, false);
         RenderTexture.active = rTex;
         tex.ReadPixels(new Rect(0, 0, rTex.width, rTex.height), 0, 0);
         tex.Apply();
         return tex;
     }
-    
+
     public static bool IsVisible(Transform visibleTransform, Camera source, float tolerancy)
     {
-        Vector3 pos = source.WorldToViewportPoint(visibleTransform.position);
-        return (pos.x < 1f + tolerancy && pos.x > -tolerancy && pos.y < 1f + tolerancy && pos.y > -tolerancy && pos.z > 0);
+        var pos = source.WorldToViewportPoint(visibleTransform.position);
+        return pos.x < 1f + tolerancy && pos.x > -tolerancy && pos.y < 1f + tolerancy && pos.y > -tolerancy &&
+               pos.z > 0;
     }
 
     public static GameObject FindNearestMirror(Transform origin, float maxDistance)
     {
-        GameObject[] mirrors = GameObject.FindGameObjectsWithTag("Mirror");
-        if (mirrors.Length == 0)
-        {
-            return null;
-        }
-        float minDistance = Mathf.Infinity;
+        var mirrors = GameObject.FindGameObjectsWithTag("Mirror");
+        if (mirrors.Length == 0) return null;
+        var minDistance = Mathf.Infinity;
         GameObject nearestMirror = null;
-        foreach (GameObject checkMirror in mirrors)
+        foreach (var checkMirror in mirrors)
         {
             var currentDistance = (origin.position - checkMirror.transform.position).magnitude;
             if (currentDistance <= maxDistance && currentDistance <= minDistance)
@@ -78,6 +78,7 @@ public static class Utilities
                 nearestMirror = checkMirror;
             }
         }
+
         return nearestMirror;
     }
 

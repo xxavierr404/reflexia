@@ -45,11 +45,7 @@ public class FloorButton : MonoBehaviour
     private void ToggleTargets()
     {
         if (targets != null)
-        {
             foreach (var target in targets)
-            {
                 target.Toggle();
-            }
-        }
     }
 }

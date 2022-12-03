@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class StoryTrigger : MonoBehaviour
@@ -10,12 +8,11 @@ public class StoryTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("Player"))
+        if (other.CompareTag("Player"))
         {
             DialogueManager.GetInstance().StartDialogue(script, textPause);
             timesToLive--;
             if (timesToLive == 0) Destroy(gameObject);
         }
     }
-
 }

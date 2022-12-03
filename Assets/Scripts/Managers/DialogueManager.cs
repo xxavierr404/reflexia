@@ -1,29 +1,28 @@
 using System.Collections;
-using System.Collections.Generic;
+using Ink.Runtime;
 using UnityEngine;
 using UnityEngine.UI;
-using Ink.Runtime;
 
 public class DialogueManager : MonoBehaviour
 {
-    private static DialogueManager instance; //Объект менеджера
+    private static DialogueManager instance; //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
-    [SerializeField] private GameObject dialoguePanel; //Текстовое окно с фразами персонажей
-    [SerializeField] private Text dialogueName; //Имя говорящего
-    [SerializeField] private Text dialogueText; //Слова говорящего
-    [SerializeField] private Image dialogueSprite; //Спрайт говорящего
-    [SerializeField] private Animator animator; //Аниматор появления и исчезновения окна
+    [SerializeField] private GameObject dialoguePanel; //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    [SerializeField] private Text dialogueName; //пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    [SerializeField] private Text dialogueText; //пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    [SerializeField] private Image dialogueSprite; //пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    [SerializeField] private Animator animator; //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
     [SerializeField] private AudioClip letterSound;
 
     private AudioSource audioPlayer;
-    private Dialogue phrase; //Текущая фраза
-    private Sprite lastSprite; //Предыдущий использованный в диалоге спрайт
-    private Story story; //Объект-обработчик Ink
-    private Coroutine scrolling; //Корутина посимвольного появления текста
+    private float currentPause; //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    private Sprite lastSprite; //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    private Dialogue phrase; //пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+    private bool phraseFinished; //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ?
+    private Coroutine scrolling; //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+    private Story story; //пїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Ink
 
-    public bool DialoguePlaying { get; private set; } //Идёт ли сейчас диалог?
-    private bool phraseFinished; //Закончилось ли посимвольное появление фразы на экране?
-    private float currentPause; //Используемая в данном диалоге пауза между появлением символов
+    public bool DialoguePlaying { get; private set; } //пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ?
 
     private void Awake()
     {
@@ -41,7 +40,7 @@ public class DialogueManager : MonoBehaviour
 
     public void StartDialogue(TextAsset inkScript, float pause)
     {
- //       Player.GetPlayer().anim.SetBool("Running", false); // ???
+        //       Player.GetPlayer().anim.SetBool("Running", false); // ???
         story = new Story(inkScript.text);
         currentPause = pause;
         DialoguePlaying = true;
@@ -54,29 +53,28 @@ public class DialogueManager : MonoBehaviour
     {
         if (!DialoguePlaying) return;
         StopCoroutine(scrolling);
-        if (!phraseFinished) {
+        if (!phraseFinished)
+        {
             dialogueText.text = phrase.Text;
             phraseFinished = true;
             return;
         }
+
         if (story.canContinue)
         {
             LoadPhrase();
             return;
         }
+
         ExitDialogue();
     }
 
     private void LoadPhrase()
     {
         phrase = new Dialogue(story.Continue(), currentPause);
-        foreach (string tag in story.currentTags)
-        {
+        foreach (var tag in story.currentTags)
             if (tag.StartsWith("sprite"))
-            {
                 LoadSprite(tag);
-            }
-        }
         dialogueName.text = phrase.Name;
         dialogueSprite.sprite = phrase.Sprite ? phrase.Sprite : lastSprite;
         scrolling = StartCoroutine(ScrollText());
@@ -85,8 +83,11 @@ public class DialogueManager : MonoBehaviour
 
     private void LoadSprite(string tag)
     {
-        string spriteID = tag.Substring(7);
-        if (spriteID == "off") dialogueSprite.enabled = false;
+        var spriteID = tag.Substring(7);
+        if (spriteID == "off")
+        {
+            dialogueSprite.enabled = false;
+        }
         else
         {
             dialogueSprite.enabled = true;
@@ -105,9 +106,9 @@ public class DialogueManager : MonoBehaviour
         dialogueSprite.sprite = null;
     }
 
-    IEnumerator ScrollText()
+    private IEnumerator ScrollText()
     {
-        for(int i = 0; i < phrase.Text.Length; i++)
+        for (var i = 0; i < phrase.Text.Length; i++)
         {
             dialogueText.text = phrase.Text.Substring(0, i);
             if (i == phrase.Text.Length - 1) phraseFinished = true;

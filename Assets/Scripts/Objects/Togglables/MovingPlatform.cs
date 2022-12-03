@@ -8,8 +8,8 @@ public class MovingPlatform : Togglable
     [SerializeField] private bool alreadyActive;
 
     private Vector3 currentTarget;
-    private Vector3 initialPosition;
     private Vector3 dampVelocity;
+    private Vector3 initialPosition;
 
     private bool isMoving;
 
@@ -20,16 +20,23 @@ public class MovingPlatform : Togglable
         isMoving = alreadyActive;
         if (alreadyActive) Activate();
     }
-    
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player")) collision.transform.SetParent(transform);
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player")) collision.transform.SetParent(null);
+    }
+
     public override void Toggle()
     {
         if (isMoving)
-        {
             Stop();
-        } else
-        {
+        else
             Activate();
-        }
         isMoving = !isMoving;
     }
 
@@ -43,11 +50,12 @@ public class MovingPlatform : Togglable
         StopAllCoroutines();
     }
 
-    IEnumerator Slide()
+    private IEnumerator Slide()
     {
-        while (true) {
+        while (true)
+        {
             float dist;
-            currentTarget = (currentTarget == initialPosition) ? target.position : initialPosition;
+            currentTarget = currentTarget == initialPosition ? target.position : initialPosition;
             do
             {
                 dist = Vector3.Distance(transform.position, currentTarget);
@@ -56,15 +64,4 @@ public class MovingPlatform : Togglable
             } while (dist > 0.5f);
         }
     }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Player")) collision.transform.SetParent(transform);
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Player")) collision.transform.SetParent(null);
-    }
-
 }

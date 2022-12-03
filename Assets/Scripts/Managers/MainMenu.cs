@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -15,21 +13,23 @@ public class MainMenu : MonoBehaviour
         audioPlayer = GetComponent<AudioSource>();
         if (!PlayerPrefs.HasKey("Level")) loadButton.gameObject.SetActive(false);
     }
+
     public void NewGame()
     {
         audioPlayer.PlayOneShot(clickSound);
         PlayerPrefs.SetString("Level", "Intro");
         SceneManager.LoadScene("Intro");
     }
+
     public void LoadGame()
     {
         audioPlayer.PlayOneShot(clickSound);
         SceneManager.LoadScene(PlayerPrefs.GetString("Level"));
     }
+
     public void Quit()
     {
         audioPlayer.PlayOneShot(clickSound);
         Application.Quit();
     }
-
 }
