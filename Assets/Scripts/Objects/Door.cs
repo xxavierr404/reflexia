@@ -37,8 +37,6 @@ public class Door : Togglable
 
     public void Open()
     {
-        Debug.Log(name);
-        Debug.Log(direction);
         slideCoroutine = StartCoroutine(Utilities.LerpPosition(transform, initialPosition + slideLength * direction, durationOut));
     }
     public void Close()
