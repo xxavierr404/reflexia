@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [ReadOnly] public Rigidbody rigidBody; //Rigidbody игрока
+    [ReadOnly] public Rigidbody rigidBody;
     [SerializeField] private float jumpMultiplyer; //Множитель высоты прыжков
     private static Player instance;
     public float speed; //Скорость передвижения игрока
@@ -18,8 +18,11 @@ public class Player : MonoBehaviour
     public Transform reflection; //Transform отражения игрока в зеркале
     public Animator anim;
 
-    public delegate void OnSpace();
-    public OnSpace OnSpaceEvent { get; set; }
+    private delegate void OnSpace();
+
+    private delegate void OnEKeyPressed();
+    private OnSpace OnSpaceEvent { get; set; }
+    private OnEKeyPressed OnEKeyEvent { get; set; }
     
     void Awake()
     {
@@ -32,6 +35,7 @@ public class Player : MonoBehaviour
         JumpCount = 0;
         OnSpaceEvent += Jump;
         OnSpaceEvent += () => DialogueManager.GetInstance().ContinueDialogue();
+        OnEKeyEvent += transform.Find("ObjectHolder").GetComponent<ObjectHolder>().ToggleHold;
     }
 
     private void Update()
