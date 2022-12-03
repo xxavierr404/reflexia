@@ -4,7 +4,7 @@ namespace Interfaces
 {
     public interface IMovementManager
     {
-        void Movement(Vector3 moveVector, GameObject mirror);
-        void MovementStop();
+        void Move(Vector3 moveVector, Mirror mirror);
+        void StopMovement();
     }
 }

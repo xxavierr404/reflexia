@@ -1,4 +1,5 @@
 using Cinemachine;
+using Interfaces;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -8,6 +9,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Rigidbody rigidBody;
     [SerializeField] private float jumpMultiplyer; //Множитель высоты прыжков
     [SerializeField] private Transform reflection; //Transform отражения игрока в зеркале
+    [SerializeField] private ObjectHolder holder;
     [SerializeField] private SkinnedMeshRenderer playerMesh; //Mesh модели игрока
     [SerializeField] private float speed; //Скорость передвижения игрока
     [SerializeField] private Animator anim;
@@ -15,14 +17,14 @@ public class Player : MonoBehaviour
     private bool _blockJump; //Флаг для блокировки прыжков
     private short _jumpCount;
     private short _jumpFrameDelay;
-    private ObjectHolder _holder;
     private GameMode _gameMode;
-    private Mirror _usedMirror;
-    private Camera _usedMirrorCamera;
-    private bool _reflectionTeleport;
+    private Mirror _nearestMirror;
+    private Camera _nearestMirrorCamera;
+    private IMovementManager _movementManager;
     
     private static readonly int MidAir = Animator.StringToHash("MidAir");
     private static readonly int Running = Animator.StringToHash("Running");
+    private static readonly int JumpAnimationId = Animator.StringToHash("Jump");
 
     public OnKeyPressed OnSpaceEvent { get; set; }
     private OnKeyPressed OnEKeyEvent { get; set; }
@@ -35,20 +37,41 @@ public class Player : MonoBehaviour
         anim = GetComponent<Animator>();
         rigidBody = GetComponent<Rigidbody>();
         rigidBody.freezeRotation = true;
-        reflection = transform.Find("PlayerReflection");
+
         _blockJump = false;
         _jumpCount = 0;
         _jumpFrameDelay = Utilities.FramesDelay;
+        
+        SetupKeyEvents();
+
+        _gameMode = GameMode.ThreeD;
+        _movementManager = new Movement3DManager(this);
+    }
+
+    private void SetupKeyEvents()
+    {
         OnSpaceEvent += Jump;
         OnSpaceEvent += () => DialogueManager.GetInstance().ContinueDialogue();
-        OnEKeyEvent += transform.Find("ObjectHolder").GetComponent<ObjectHolder>().ToggleHold;
-        _gameMode = GameMode.ThreeD;
+
+        OnQKeyEvent += SwitchGameMode;
+
+        OnEKeyEvent += () =>
+        {
+            if (_gameMode == GameMode.TwoD)
+            {
+                return;
+            }
+
+            holder.ToggleHold();
+        };
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space) && _jumpCount < 2 && !_blockJump) OnSpaceEvent?.Invoke();
         CheckJumpConditions();
+        _nearestMirror = FindNearestMirror();
+        RotateReflection();
     }
 
     private void CheckJumpConditions()
@@ -70,16 +93,13 @@ public class Player : MonoBehaviour
         var vertical = Input.GetAxis("Vertical");
         var movementVector = new Vector3(horizontal, 0, vertical);
         anim.SetBool(Running, movementVector.magnitude >= 0.1f);
-        if (GameManager.gameMode == GameMode.TwoD)
-            Movement2DManager.Movement2D(movementVector);
-        else
-            Movement3DManager.Movement3D(movementVector);
+        _movementManager.Move(movementVector, _nearestMirror);
     }
 
     private void Jump()
     {
-        if (_jumpCount == 0) anim.SetTrigger("Jump");
-        anim.SetBool("MidAir", true);
+        if (_jumpCount == 0) anim.SetTrigger(JumpAnimationId);
+        anim.SetBool(MidAir, true);
         rigidBody.AddForce(Vector3.up * jumpMultiplyer, ForceMode.VelocityChange);
         _jumpFrameDelay = 5;
         _jumpCount++;
@@ -92,6 +112,7 @@ public class Player : MonoBehaviour
             return;
         }
 
+        _movementManager.StopMovement();
         if (_gameMode == GameMode.ThreeD)
         {
             TrySwitch3Dto2D();
@@ -104,21 +125,20 @@ public class Player : MonoBehaviour
 
     private void TrySwitch3Dto2D()
     {
-        var mirror = FindNearestMirror();
-        if (!mirror)
+        if (!_nearestMirror)
         {
             OnGameModeChangeFailEvent?.Invoke();
             return;
         }
 
-        var mirrorCam = mirror.GetComponent<Camera>();
+        var mirrorCam = _nearestMirror.GetComponent<Camera>();
         if (!IsMirrorAccessible(mirrorCam))
         {
             OnGameModeChangeFailEvent?.Invoke();
             return;
         }
 
-        Switch3Dto2D(mirror);
+        Switch3Dto2D(_nearestMirror);
     }
 
     private bool IsMirrorAccessible(Camera mirrorCam)
@@ -132,10 +152,10 @@ public class Player : MonoBehaviour
                    1 << 9);
     }
 
-    private void Switch3Dto2D(GameObject mirror)
+    private void Switch3Dto2D(Mirror mirror)
     {
-        _usedMirror = mirror.GetComponent<Mirror>();
-        _usedMirror.enabled = false;
+        _nearestMirror = mirror;
+        _nearestMirror.enabled = false;
         
         rigidBody.velocity = Vector3.zero;
         playerMesh.enabled = false;
@@ -144,7 +164,7 @@ public class Player : MonoBehaviour
         OnGameModeChangeSuccessEvent?.Invoke(_gameMode, mirror);
     }
 
-    private GameObject FindNearestMirror()
+    private Mirror FindNearestMirror()
     {
         return Utilities.FindNearestMirror(transform, GameManager.GetInstance().GetActiveMirrorsDistance());
     }
@@ -152,8 +172,7 @@ public class Player : MonoBehaviour
     private void Switch2Dto3D()
     {
         playerMesh.enabled = true;
-        _usedMirror.enabled = true;
-        _reflectionTeleport = false;
+        _nearestMirror.enabled = true;
         _blockJump = false;
         _gameMode = GameMode.ThreeD;
         OnGameModeChangeSuccessEvent?.Invoke(_gameMode, null);
@@ -174,9 +193,15 @@ public class Player : MonoBehaviour
         _blockJump = block;
     }
     
+    private void RotateReflection()
+    {
+        reflection.rotation = FindNearestMirror().GetCamera().transform.rotation;
+        reflection.Rotate(0, 0, 180);
+    }
+    
     public delegate void OnKeyPressed();
 
-    public delegate void OnGameModeChangeSuccess(GameMode newGameMode, GameObject mirror);
+    public delegate void OnGameModeChangeSuccess(GameMode newGameMode, Mirror mirror);
 
     public delegate void OnGameModeChangeFail();
 }

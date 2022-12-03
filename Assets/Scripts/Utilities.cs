@@ -3,15 +3,15 @@ using UnityEngine;
 
 public static class Utilities
 {
-    public static Vector3 DampVelocity;
     public const short FramesDelay = 5;
+    private static Vector3 _dampVelocity;
 
     public static IEnumerator Focus(Transform from, Transform to)
     {
         while (true)
         {
             var targetPos = to.TransformPoint(Vector3.back * 12);
-            from.position = Vector3.SmoothDamp(from.position, targetPos, ref DampVelocity, 0.3f);
+            from.position = Vector3.SmoothDamp(from.position, targetPos, ref _dampVelocity, 0.3f);
             yield return null;
         }
     }
@@ -62,13 +62,13 @@ public static class Utilities
         return pos.x < 1f + tolerancy && pos.x > -tolerancy && pos.y < 1f + tolerancy && pos.y > -tolerancy &&
                pos.z > 0;
     }
-
-    public static GameObject FindNearestMirror(Transform origin, float maxDistance)
+    
+    public static Mirror FindNearestMirror(Transform origin, float maxDistance)
     {
-        var mirrors = GameObject.FindGameObjectsWithTag("Mirror");
-        if (mirrors.Length == 0) return null;
+        var mirrors = GameManager.GetInstance().GetMirrorsPool();
+        if (mirrors.Count == 0) return null;
         var minDistance = Mathf.Infinity;
-        GameObject nearestMirror = null;
+        Mirror nearestMirror = null;
         foreach (var checkMirror in mirrors)
         {
             var currentDistance = (origin.position - checkMirror.transform.position).magnitude;

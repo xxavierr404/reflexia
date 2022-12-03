@@ -22,11 +22,11 @@ public class Movement2DManager : IMovementManager
         _layerMask = LayerMask.GetMask("MirrorPlatforms", "MovablePlatforms");
     }
 
-    public void Movement(Vector3 moveVector, GameObject mirror)
+    public void Move(Vector3 moveVector, Mirror mirror)
     {
         var playerRigidbody = player.GetRigidbody();
         var speed = player.GetSpeed();
-        _mirrorCam = _mirrorCam ? _mirrorCam : mirror.GetComponent<Camera>().transform;
+        _mirrorCam = _mirrorCam ? _mirrorCam : mirror.GetCamera().transform;
         moveVector = mirror.transform.TransformDirection(moveVector);
         
         ProcessHorizontalCollision(moveVector, playerRigidbody, speed);
@@ -71,7 +71,7 @@ public class Movement2DManager : IMovementManager
         }
     }
 
-    public void MovementStop()
+    public void StopMovement()
     {
         if (_reflectionTeleport)
         {

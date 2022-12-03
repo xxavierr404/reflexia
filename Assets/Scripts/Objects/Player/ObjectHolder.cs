@@ -4,7 +4,7 @@ using UnityEngine;
 public class ObjectHolder : MonoBehaviour
 {
     private bool _moving;
-    public Transform Movable { get; private set; }
+    private Transform Movable { get; set; }
 
     private void Awake()
     {
@@ -33,7 +33,6 @@ public class ObjectHolder : MonoBehaviour
 
     public void ToggleHold()
     {
-        if (GameManager.gameMode == GameMode.TwoD) return;
         if (_moving)
             StopHolding();
         else if (Movable) Hold();
