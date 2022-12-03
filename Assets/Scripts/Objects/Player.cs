@@ -6,8 +6,8 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [ReadOnly] public Rigidbody rigidBody; //Rigidbody игрока
-    private static Player instance;
     [SerializeField] private float jumpMultiplyer; //Множитель высоты прыжков
+    private static Player instance;
     public float speed; //Скорость передвижения игрока
 
     public bool blockJump; //Флаг для блокировки прыжков
@@ -18,6 +18,9 @@ public class Player : MonoBehaviour
     public Transform reflection; //Transform отражения игрока в зеркале
     public Animator anim;
 
+    public delegate void OnSpace();
+    public OnSpace OnSpaceEvent { get; set; }
+    
     void Awake()
     {
         instance = this;
@@ -27,6 +30,8 @@ public class Player : MonoBehaviour
         reflection = transform.Find("PlayerReflection");
         blockJump = false;
         JumpCount = 0;
+        OnSpaceEvent += Jump;
+        OnSpaceEvent += () => DialogueManager.GetInstance().ContinueDialogue();
     }
 
     private void Update()
@@ -41,7 +46,8 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (DialogueManager.GetInstance().DialoguePlaying) return;
+        var manager = DialogueManager.GetInstance();
+        if (manager && manager.DialoguePlaying) return;
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
         Vector3 movementVector = new Vector3(horizontal, 0, vertical);

@@ -1,25 +1,41 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class MovingPlatform : MonoBehaviour
+public class MovingPlatform : Togglable
 {
     [SerializeField] private Transform target;
     [SerializeField] private float duration;
     [SerializeField] private bool alreadyActive;
+
     private Vector3 currentTarget;
     private Vector3 initialPosition;
     private Vector3 dampVelocity;
+
+    private bool isMoving;
+
     private void Start()
     {
         initialPosition = transform.position;
         currentTarget = initialPosition;
+        isMoving = alreadyActive;
         if (alreadyActive) Activate();
     }
     
+    public override void Toggle()
+    {
+        if (isMoving)
+        {
+            Stop();
+        } else
+        {
+            Activate();
+        }
+        isMoving = !isMoving;
+    }
+
     public void Activate()
     {
-        StartCoroutine(Sliding());
+        StartCoroutine(Slide());
     }
 
     public void Stop()
@@ -27,7 +43,7 @@ public class MovingPlatform : MonoBehaviour
         StopAllCoroutines();
     }
 
-    IEnumerator Sliding()
+    IEnumerator Slide()
     {
         while (true) {
             float dist;

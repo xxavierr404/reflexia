@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7073124978661676703}
   - component: {fileID: 7073124978661676701}
   - component: {fileID: 7073124978661676702}
-  - component: {fileID: 7073124978661676700}
+  - component: {fileID: 2321227652939222095}
   - component: {fileID: 9139507679733333881}
   m_Layer: 0
   m_Name: GameManager
@@ -78,7 +78,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29f065e3c0f94c0b86ebaa72bc074eaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &7073124978661676700
+--- !u!114 &2321227652939222095
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -87,7 +87,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7073124978661676697}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7427e90fee000324886ecc0f8d143dc9, type: 3}
+  m_Script: {fileID: 11500000, guid: 458c5d595e926d747939f1b0c25c5290, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   dialoguePanel: {fileID: 0}
@@ -95,7 +95,7 @@ MonoBehaviour:
   dialogueText: {fileID: 0}
   dialogueSprite: {fileID: 0}
   animator: {fileID: 0}
-  letterSound: {fileID: 8300000, guid: 635bb516efecc4961a33481332684746, type: 3}
+  letterSound: {fileID: 0}
 --- !u!82 &9139507679733333881
 AudioSource:
   m_ObjectHideFlags: 0

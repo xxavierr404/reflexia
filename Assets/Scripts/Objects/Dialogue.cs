@@ -6,7 +6,7 @@ public class Dialogue
 {
     public string Name { get; private set; }
     public string Text { get; private set; }
-    public Sprite Sprite { get; private set; }
+    public Sprite Sprite { get; set; }
     public float ScrollPause { get; private set; }
     public Dialogue(string story, float pause)
     {
@@ -16,8 +16,8 @@ public class Dialogue
         this.ScrollPause = pause;
         this.Sprite = null;
     }
-    public void SetSprite(Sprite newSprite)
+    public Dialogue(string story, float pause, Sprite sprite) : this(story, pause)
     {
-        Sprite = newSprite;
+        Sprite = sprite;
     }
 }
