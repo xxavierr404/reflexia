@@ -1,91 +1,115 @@
-﻿using UnityEngine;
+﻿using Interfaces;
+using UnityEngine;
 
-public class Movement2DManager : MonoBehaviour
+public class Movement2DManager : IMovementManager
 {
-    private static Player player; //Игрок
-    private static float moveSign; //Направление последнего движения по локальной оси X зеркала
-
-    private static RaycastHit
-        mirrorTeleportCollision; //Информация о последней коллизии "ног" игрока с отражением в зеркале
-
-    private static LayerMask layerMask; //Маска слоёв для рейкастов обработки коллизии отражений
-    private static Transform mirrorCam; //Камера ближайшего зеркала
-
-    private void Awake()
+    private Player player;
+    private float _moveSign; //Направление последнего движения по локальной оси X зеркала
+    private RaycastHit
+        _mirrorTeleportCollision; //Информация о последней коллизии "ног" игрока с отражением в зеркале
+    private LayerMask _layerMask; //Маска слоёв для рейкастов обработки коллизии отражений
+    private Transform _mirrorCam; //Камера ближайшего зеркала
+    private bool _reflectionTeleport;
+    private Vector3 _teleportPosition;
+    
+    public Movement2DManager(Player player)
     {
-        layerMask = LayerMask.GetMask("MirrorPlatforms", "MovablePlatforms");
+        this.player = player;
+        player.OnSpaceEvent += () =>
+        {
+            _reflectionTeleport = false;
+        };
+        _layerMask = LayerMask.GetMask("MirrorPlatforms", "MovablePlatforms");
     }
 
-    public static void Movement2D(Vector3 move)
+    public void Movement(Vector3 moveVector, GameObject mirror)
     {
-        if (!player) player = Player.GetPlayer();
-        mirrorCam = GameManager.mirrorCam;
-        move.z = 0; //Обнуление z-компоненты движения
-        move = GameManager.mirror.transform.TransformDirection(move);
-        if (move.magnitude >= 0.1f) moveSign = Mathf.Sign(move.x);
-        if (!CheckHorizontalCollision(move) &&
-            !CheckHorizontalCollisionOnCenter()) //Движение при отсутствии препятствий на горизонтали
+        var playerRigidbody = player.GetRigidbody();
+        var speed = player.GetSpeed();
+        _mirrorCam = _mirrorCam ? _mirrorCam : mirror.GetComponent<Camera>().transform;
+        moveVector = mirror.transform.TransformDirection(moveVector);
+        
+        ProcessHorizontalCollision(moveVector, playerRigidbody, speed);
+        ProcessVerticalCollision(playerRigidbody);
+    }
+
+    private void ProcessHorizontalCollision(Vector3 moveVector, Rigidbody playerRigidbody, float speed)
+    {
+        moveVector.z = 0; //Обнуление z-компоненты движения
+        if (moveVector.magnitude >= 0.1f) _moveSign = Mathf.Sign(moveVector.x);
+        if (!CheckHorizontalCollision(playerRigidbody, moveVector) &&
+            !CheckHorizontalCollisionOnCenter(playerRigidbody)) //Движение при отсутствии препятствий на горизонтали
         {
-            var velocity = player.rigidBody.velocity;
-            player.rigidBody.AddForce(move * player.speed - new Vector3(velocity.x, 0, velocity.z),
+            var velocity = playerRigidbody.velocity;
+            playerRigidbody.AddForce(moveVector * speed - new Vector3(velocity.x, 0, velocity.z),
                 ForceMode.VelocityChange);
         }
         else //Остановка при горизонтальной коллизии с отражением
         {
-            player.rigidBody.velocity = new Vector3(0, player.rigidBody.velocity.y, 0);
+            playerRigidbody.velocity = new Vector3(0, playerRigidbody.velocity.y, 0);
         }
+    }
 
-        if (CheckVerticalCollisionOnHead()) //Обработка столкновений головой
+    private void ProcessVerticalCollision(Rigidbody playerRigidbody)
+    {
+        if (CheckVerticalCollisionOnHead(playerRigidbody)) //Обработка столкновений головой
         {
-            player.rigidBody.AddForce(Vector3.down * 3, ForceMode.VelocityChange);
-            player.blockJump = true;
+            playerRigidbody.AddForce(Vector3.down * 3, ForceMode.VelocityChange);
+            player.SetJumpBlock(true);
         }
         else
         {
-            player.blockJump = false;
+            player.SetJumpBlock(false);
         }
 
-        if (CheckVerticalCollisionOnFeet()) //Приземление на верхнюю грань отражения
+        if (CheckVerticalCollisionOnFeet(playerRigidbody)) //Приземление на верхнюю грань отражения
         {
-            player.rigidBody.AddForce(player.transform.up - new Vector3(0, player.rigidBody.velocity.y, 0),
+            playerRigidbody.AddForce(player.transform.up - new Vector3(0, playerRigidbody.velocity.y, 0),
                 ForceMode.VelocityChange);
-            GameManager.teleportLocation = mirrorTeleportCollision.point;
-            GameManager.reflectionTeleport = true;
-            if (player.FramesDelay == 0) player.JumpCount = 0;
+            _teleportPosition = _mirrorTeleportCollision.point;
+            _reflectionTeleport = true;
         }
     }
 
-    private static bool CheckVerticalCollisionOnFeet()
+    public void MovementStop()
     {
-        var transform = player.transform;
-        var position = mirrorCam.position;
+        if (_reflectionTeleport)
+        {
+            player.transform.position = _teleportPosition + player.transform.up;
+        }
+    }
+
+    private bool CheckVerticalCollisionOnFeet(Rigidbody rigidbody)
+    {
+        var transform = rigidbody.transform;
+        var position = _mirrorCam.position;
         var mirrorCollisionRayVertical = new Ray(position, transform.position - transform.up - position);
-        return Physics.Raycast(mirrorCollisionRayVertical, out mirrorTeleportCollision, Mathf.Infinity, layerMask);
+        return Physics.Raycast(mirrorCollisionRayVertical, out _mirrorTeleportCollision, Mathf.Infinity, _layerMask);
     }
 
-    private static bool CheckVerticalCollisionOnHead()
+    private bool CheckVerticalCollisionOnHead(Rigidbody rigidbody)
     {
-        var transform = player.transform;
-        var position = mirrorCam.position;
+        var transform = rigidbody.transform;
+        var position = _mirrorCam.position;
         var mirrorCollisionRayVertical = new Ray(position, transform.position + transform.up * 0.8f - position);
-        return Physics.Raycast(mirrorCollisionRayVertical, Mathf.Infinity, layerMask);
+        return Physics.Raycast(mirrorCollisionRayVertical, Mathf.Infinity, _layerMask);
     }
 
-    private static bool CheckHorizontalCollisionOnCenter()
+    private bool CheckHorizontalCollisionOnCenter(Rigidbody rigidbody)
     {
-        var position = mirrorCam.position;
+        var position = _mirrorCam.position;
         var mirrorCollisionRayHorizontal = new Ray(position,
-            player.transform.position +
-            new Vector3(0.5f * moveSign, Mathf.Clamp(player.rigidBody.velocity.y * -2.0f, -1.0f, 1.0f), 0) - position);
-        return Physics.Raycast(mirrorCollisionRayHorizontal, Mathf.Infinity, layerMask);
+            rigidbody.transform.position +
+            new Vector3(0.5f * _moveSign, Mathf.Clamp(rigidbody.velocity.y * -2.0f, -1.0f, 1.0f), 0) - position);
+        return Physics.Raycast(mirrorCollisionRayHorizontal, Mathf.Infinity, _layerMask);
     }
 
-    private static bool CheckHorizontalCollision(Vector3 move)
+    private bool CheckHorizontalCollision(Rigidbody rigidbody, Vector3 move)
     {
-        var transform = player.transform;
-        var position = mirrorCam.position;
+        var transform = rigidbody.transform;
+        var position = _mirrorCam.position;
         var mirrorCollisionRayHorizontal =
             new Ray(position, transform.position - transform.up * 0.7f + move * 0.8f - position);
-        return Physics.Raycast(mirrorCollisionRayHorizontal, Mathf.Infinity, layerMask);
+        return Physics.Raycast(mirrorCollisionRayHorizontal, Mathf.Infinity, _layerMask);
     }
 }

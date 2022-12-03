@@ -8,7 +8,7 @@ public static class Utilities
 
     public static IEnumerator Focus(Transform from, Transform to)
     {
-        while (Vector3.Distance(from.position, to.position) > 0.1f)
+        while (true)
         {
             var targetPos = to.TransformPoint(Vector3.back * 12);
             from.position = Vector3.SmoothDamp(from.position, targetPos, ref DampVelocity, 0.3f);

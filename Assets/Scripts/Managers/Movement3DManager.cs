@@ -1,55 +1,52 @@
-﻿using UnityEngine;
+﻿using Interfaces;
+using UnityEngine;
 
-public class Movement3DManager : MonoBehaviour
+public class Movement3DManager : IMovementManager
 {
-    private static Player player;
-    private static float turnSmooth; //Скорость поворота игрока
-    private static Transform camTransform; //Transform камеры игрока
-    private static Transform mirrorCam; //Transform камеры ближайшего зеркала
+    private Player _player;
+    private float _turnSmooth; //Скорость поворота игрока
+    private Transform _camTransform; //Transform камеры игрока
+    private Transform _mirrorCam; //Transform камеры ближайшего зеркала
 
-    private void Awake()
+    public Movement3DManager(Player player)
     {
-        turnSmooth = 0.1f;
+        this._player = player;
+        _turnSmooth = 0.1f;
     }
 
-    public static void Movement3D(Vector3 move)
+    public void Movement(Vector3 moveVector, GameObject mirror)
     {
-        if (!player) player = Player.GetPlayer();
-        camTransform = GameManager.camTransform;
-        Debug.DrawRay(player.transform.position, player.transform.forward);
-        if (move.magnitude >= 0.1f)
+        _camTransform = Camera.main.transform;
+        var playerRigidbody = _player.GetRigidbody();
+        var speed = _player.GetSpeed();
+        if (moveVector.magnitude >= 0.1f)
         {
-            player.anim.SetBool("Running", true);
-            var targetAngle = RotatePlayer(move.x, move.z); //Вращение модели игрока при передвижении
-            move = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
-            var velocity = player.rigidBody.velocity;
-            if (!Physics.Raycast(player.transform.position, player.transform.forward, 1f, ~(1 << 8)))
-                player.rigidBody.AddForce(move * player.speed - new Vector3(velocity.x, 0, velocity.z),
+            var targetAngle = RotatePlayer(moveVector.x, moveVector.z); //Вращение модели игрока при передвижении
+            moveVector = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
+            var velocity = playerRigidbody.velocity;
+            if (!Physics.Raycast(_player.transform.position, _player.transform.forward, 1f, ~(1 << 8)))
+                playerRigidbody.AddForce(moveVector * speed - new Vector3(velocity.x, 0, velocity.z),
                     ForceMode.VelocityChange); //Движение с постоянной скоростью
         }
-        else
-        {
-            player.anim.SetBool("Running", false);
-        }
 
-        if (GameManager.mirror)
+        if (mirror)
         {
-            mirrorCam = GameManager.mirror.transform.Find("MirrorCam");
+            _mirrorCam = GameManager.mirror.transform.Find("MirrorCam");
             RotateReflection(); //Вращение отражения, чтобы оно всегда смотрело в камеру ближайшего зеркала
         }
     }
 
-    private static float RotatePlayer(float horizontal, float vertical)
+    private float RotatePlayer(float horizontal, float vertical)
     {
-        var targetAngle = Mathf.Atan2(horizontal, vertical) * Mathf.Rad2Deg + camTransform.eulerAngles.y;
-        var angle = Mathf.SmoothDampAngle(player.transform.eulerAngles.y, targetAngle, ref turnSmooth, 0.1f);
-        player.transform.rotation = Quaternion.Euler(0, angle, 0);
+        var targetAngle = Mathf.Atan2(horizontal, vertical) * Mathf.Rad2Deg + _camTransform.eulerAngles.y;
+        var angle = Mathf.SmoothDampAngle(_player.transform.eulerAngles.y, targetAngle, ref _turnSmooth, 0.1f);
+        _player.transform.rotation = Quaternion.Euler(0, angle, 0);
         return targetAngle;
     }
 
-    private static void RotateReflection()
+    private void RotateReflection()
     {
-        player.reflection.rotation = mirrorCam.rotation;
-        player.reflection.Rotate(0, 0, 180);
+        _player.reflection.rotation = _mirrorCam.rotation;
+        _player.reflection.Rotate(0, 0, 180);
     }
 }
