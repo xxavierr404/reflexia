@@ -79,6 +79,16 @@ public class Movement2DManager : IMovementManager
         }
     }
 
+    public bool IsTeleporting()
+    {
+        return _reflectionTeleport;
+    }
+
+    public Vector3 GetLastTeleportPosition()
+    {
+        return _teleportPosition;
+    }
+
     private bool CheckVerticalCollisionOnFeet(Rigidbody rigidbody)
     {
         var transform = rigidbody.transform;

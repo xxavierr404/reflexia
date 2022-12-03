@@ -6,9 +6,9 @@ public class Mirror : MonoBehaviour
     private Vector3 _lastRotation; 
     private Camera _mirrorCam;
     private static readonly int MainTex = Shader.PropertyToID("_MainTex");
-    
-    private RenderTexture MirrorTexture { get; set; }
-    private Material MirrorMaterial { get; set; }
+    private RenderTexture _mirrorTexture;
+    private RenderTexture _previousTexture;
+    private Material _mirrorMaterial;
 
     private void Awake()
     {
@@ -23,12 +23,12 @@ public class Mirror : MonoBehaviour
 
     private void InitializeTexture()
     {
-        MirrorTexture = new RenderTexture(1024, 1024, 0);
-        _mirrorCam.targetTexture = MirrorTexture;
-        MirrorMaterial = new Material(Shader.Find("Standard"));
-        MirrorMaterial.SetTexture(MainTex, MirrorTexture);
+        _mirrorTexture = new RenderTexture(1024, 1024, 0);
+        _mirrorCam.targetTexture = _mirrorTexture;
+        _mirrorMaterial = new Material(Shader.Find("Standard"));
+        _mirrorMaterial.SetTexture(MainTex, _mirrorTexture);
         transform.Find("Border").GetComponent<MeshRenderer>().material =
-            MirrorMaterial;
+            _mirrorMaterial;
     }
 
     private void Update()
@@ -38,6 +38,18 @@ public class Mirror : MonoBehaviour
         delta.z = 0;
         _mirrorCam.transform.localEulerAngles += delta;
         _lastRotation = eulerAngles;
+    }
+
+    public void Freeze()
+    {
+        _previousTexture = _mirrorTexture;
+        var freezeTexture = Utilities.ToTexture2D(_previousTexture);
+        _mirrorMaterial.SetTexture(MainTex, freezeTexture);
+    }
+
+    public void Unfreeze()
+    {
+        _mirrorMaterial.SetTexture(MainTex, _previousTexture);
     }
 
     public Camera GetCamera()

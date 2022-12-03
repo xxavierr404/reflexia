@@ -19,10 +19,18 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioClip mirrorExitSFX;
     [SerializeField] private AudioClip failedToSwitch;
     
-    private AudioSource audioPlayer;
-    private ChromaticAberration chromaticAberration;
-    private Vignette vignette;
-    private Coroutine focus;
+    private AudioSource _audioPlayer;
+    private ChromaticAberration _chromaticAberration;
+    private Vignette _vignette;
+    private Coroutine _focus;
+    private Camera _camera;
+    private CinemachineBrain _cinemachineBrain;
+
+    private void Start()
+    {
+        _camera = Camera.main;
+        _cinemachineBrain = _camera.GetComponent<CinemachineBrain>();
+    }
 
     private void Awake()
     {
@@ -32,110 +40,96 @@ public class GameManager : MonoBehaviour
 
         SetupVignette();
         SetupAberration();
-        PostProcessManager.instance.QuickVolume(11, 0, vignette, chromaticAberration);
+        PostProcessManager.instance.QuickVolume(11, 0, _vignette, _chromaticAberration);
 
-        audioPlayer = GetComponent<AudioSource>();
+        _audioPlayer = GetComponent<AudioSource>();
         
         player.OnGameModeChangeSuccessEvent += (newGameMode, mirror) =>
         {
             StopFocus();
             if (newGameMode == GameMode.TwoD)
             {
-                audioPlayer.PlayOneShot(mirrorEnterSFX);
+                _audioPlayer.PlayOneShot(mirrorEnterSFX);
                 Ignore3DLayer();
                 AnimateCameraToMirror(mirror.transform);
             }
             else
             {
-                audioPlayer.PlayOneShot(mirrorExitSFX);
+                _audioPlayer.PlayOneShot(mirrorExitSFX);
                 StopIgnoring3DLayer();
             }
         };
 
         player.OnGameModeChangeFailEvent += () =>
         {
-            audioPlayer.PlayOneShot(failedToSwitch);
+            _audioPlayer.PlayOneShot(failedToSwitch);
         };
     }
 
-    private static void StopIgnoring3DLayer()
+    private void StopIgnoring3DLayer()
     {
         Physics.IgnoreLayerCollision(7, 9, false);
-        Camera.main.cullingMask = ~LayerMask.GetMask("PlayerReflection");
-        Camera.main.GetComponent<CinemachineBrain>().enabled = true;
+        _camera.cullingMask = ~LayerMask.GetMask("PlayerReflection");
+        _cinemachineBrain.enabled = true;
     }
 
     private void SetupAberration()
     {
-        chromaticAberration = ScriptableObject.CreateInstance<ChromaticAberration>();
-        chromaticAberration.enabled.Override(false);
-        chromaticAberration.intensity.Override(1f);
+        _chromaticAberration = ScriptableObject.CreateInstance<ChromaticAberration>();
+        _chromaticAberration.enabled.Override(false);
+        _chromaticAberration.intensity.Override(1f);
     }
 
     private void SetupVignette()
     {
-        vignette = ScriptableObject.CreateInstance<Vignette>();
-        vignette.enabled.Override(false);
-        vignette.intensity.Override(0.685f);
-        vignette.smoothness.Override(0.8f);
-        vignette.roundness.Override(0.2f);
+        _vignette = ScriptableObject.CreateInstance<Vignette>();
+        _vignette.enabled.Override(false);
+        _vignette.intensity.Override(0.685f);
+        _vignette.smoothness.Override(0.8f);
+        _vignette.roundness.Override(0.2f);
     }
 
-    private void Update()
+    public void StartTimeShiftFX()
     {
-        if (Input.GetKeyDown(KeyCode.R) && gameMode == GameMode.TwoD && allowTimeRewind) StartCoroutine(TimeShift());
-    }
-
-    public IEnumerator TimeShift()
-    {
-        timeShiftLocation = reflectionTeleport ? teleportLocation + Vector3.up : player.transform.position;
-        var reflectionTexture = mirror.GetComponent<Mirror>().mirrorTexture;
-        var freezeTexture = Utilities.ToTexture2D(reflectionTexture);
-        var mirrorMaterial = mirror.GetComponent<Mirror>().mirrorMaterial;
-        mirrorMaterial.SetTexture("_MainTex", freezeTexture);
-        SwitchGameMode();
-        vignette = ScriptableObject.CreateInstance<Vignette>();
         StartCoroutine(TimeShiftFX());
-        yield return new WaitForSeconds(5);
-        mirrorMaterial.SetTexture("_MainTex", reflectionTexture);
-        player.transform.position = timeShiftLocation;
-    } //Отмотка времени
-
+    }
+    
     private IEnumerator TimeShiftFX()
     {
-        vignette.enabled.Override(true);
-        chromaticAberration.enabled.Override(true);
-        while (vignette.intensity.value > 0f || chromaticAberration.intensity.value > 0f)
+        _vignette = ScriptableObject.CreateInstance<Vignette>();
+        _vignette.enabled.Override(true);
+        _chromaticAberration.enabled.Override(true);
+        while (_vignette.intensity.value > 0f || _chromaticAberration.intensity.value > 0f)
         {
-            vignette.intensity.value -= 0.02f;
-            chromaticAberration.intensity.value -= 0.0137f;
+            _vignette.intensity.value -= 0.02f;
+            _chromaticAberration.intensity.value -= 0.0137f;
             yield return new WaitForSeconds(0.1f);
         }
 
-        vignette.enabled.Override(false);
-        vignette.intensity.Override(0.685f);
-        chromaticAberration.enabled.Override(false);
-        chromaticAberration.intensity.Override(1f);
+        _vignette.enabled.Override(false);
+        _vignette.intensity.Override(0.685f);
+        _chromaticAberration.enabled.Override(false);
+        _chromaticAberration.intensity.Override(1f);
     }
 
     private void Ignore3DLayer()
     {
-        Camera.main.cullingMask = LayerMask.GetMask("Default", "MirrorIgnore");
-        Camera.main.GetComponent<CinemachineBrain>().enabled = false;
+        _camera.cullingMask = LayerMask.GetMask("Default", "MirrorIgnore");
+        _cinemachineBrain.enabled = false;
         Physics.IgnoreLayerCollision(7, 9);
     }
 
     private void AnimateCameraToMirror(Transform mirror)
     {
-        focus = StartCoroutine(Utilities.Focus(Camera.main.transform, transform));
-        StartCoroutine(Utilities.LerpRotation(Camera.main.transform, transform, 2.0f));
+        _focus = StartCoroutine(Utilities.Focus(_camera.transform, transform));
+        StartCoroutine(Utilities.LerpRotation(_camera.transform, transform, 2.0f));
     }
 
     private void StopFocus()
     {
-        if (focus != null)
+        if (_focus != null)
         {
-            StopCoroutine(focus);
+            StopCoroutine(_focus);
         }
     }
     
@@ -154,6 +148,11 @@ public class GameManager : MonoBehaviour
         return allowSwitchingGameMode;
     }
 
+    public bool IsAllowedToUseTimeShift()
+    {
+        return allowTimeRewind;
+    }
+    
     public void AddMirrorToPool(Mirror mirror)
     {
         _mirrorPool.Add(mirror);

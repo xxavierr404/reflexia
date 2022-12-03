@@ -1,3 +1,4 @@
+using System.Collections;
 using Cinemachine;
 using Interfaces;
 using UnityEngine;
@@ -19,7 +20,6 @@ public class Player : MonoBehaviour
     private short _jumpFrameDelay;
     private GameMode _gameMode;
     private Mirror _nearestMirror;
-    private Camera _nearestMirrorCamera;
     private IMovementManager _movementManager;
     
     private static readonly int MidAir = Animator.StringToHash("MidAir");
@@ -29,6 +29,7 @@ public class Player : MonoBehaviour
     public OnKeyPressed OnSpaceEvent { get; set; }
     private OnKeyPressed OnEKeyEvent { get; set; }
     private OnKeyPressed OnQKeyEvent { get; set; }
+    private OnKeyPressed OnRKeyEvent { get; set; }
     public OnGameModeChangeSuccess OnGameModeChangeSuccessEvent { get; set; }
     public OnGameModeChangeFail OnGameModeChangeFailEvent { get; set; }
 
@@ -63,6 +64,17 @@ public class Player : MonoBehaviour
             }
 
             holder.ToggleHold();
+        };
+
+        OnRKeyEvent += () =>
+        {
+            if (_gameMode != GameMode.TwoD || !GameManager.GetInstance().IsAllowedToSwitchGameModes())
+            {
+                return;
+            }
+
+            StartCoroutine(TimeShift());
+            GameManager.GetInstance().StartTimeShiftFX();
         };
     }
 
@@ -105,7 +117,7 @@ public class Player : MonoBehaviour
         _jumpCount++;
     }
 
-    public void SwitchGameMode()
+    private void SwitchGameMode()
     {
         if (!GameManager.GetInstance().IsAllowedToSwitchGameModes())
         {
@@ -131,7 +143,7 @@ public class Player : MonoBehaviour
             return;
         }
 
-        var mirrorCam = _nearestMirror.GetComponent<Camera>();
+        var mirrorCam = _nearestMirror.GetCamera();
         if (!IsMirrorAccessible(mirrorCam))
         {
             OnGameModeChangeFailEvent?.Invoke();
@@ -177,6 +189,17 @@ public class Player : MonoBehaviour
         _gameMode = GameMode.ThreeD;
         OnGameModeChangeSuccessEvent?.Invoke(_gameMode, null);
     }
+
+    private IEnumerator TimeShift()
+    {
+        var manager = (Movement2DManager) _movementManager;
+        var timeShiftLocation = manager.IsTeleporting() 
+            ? manager.GetLastTeleportPosition() + Vector3.up 
+            : transform.position;
+        SwitchGameMode();
+        yield return new WaitForSeconds(5);
+        transform.position = timeShiftLocation;
+    } 
 
     public Rigidbody GetRigidbody()
     {
