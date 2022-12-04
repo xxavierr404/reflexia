@@ -1,71 +1,84 @@
-﻿namespace Objects.Player
+﻿using UnityEngine;
+
+namespace Player
 {
-    public class GameModeController
+    public class GameModeController : MonoBehaviour
     {
-        private readonly PlayerController _player;
+        [SerializeField] private bool canSwitchModes;
+        [SerializeField] private PlayerController player;
 
-        public GameModeController(PlayerController player)
+        public delegate void OnGameModeChangeFail();
+        public delegate void OnGameModeChangeSuccess(GameMode newGameMode, Mirror mirror);
+        
+        public OnGameModeChangeSuccess OnGameModeChangeSuccessEvent { get; set; }
+        public OnGameModeChangeFail OnGameModeChangeFailEvent { get; set; }
+        
+        public void Start()
         {
-            _player = player;
-            GameMode = GameMode.ThreeD;
+            player.GameMode = GameMode.ThreeD;
+
+            player.OnMoveEvent += (moveVector) => CheckMirrorBoundaries();
+            player.OnSwitchMode += SwitchGameMode;
+            OnGameModeChangeSuccessEvent += (newGameMode, moveVector) => player.MovementStrategy.StopMovement();
         }
 
-        public GameMode GameMode { get; private set; }
-
-        public void CheckMirrorBoundaries()
+        private void SwitchGameMode()
         {
-            if (!Utilities.IsVisible(_player.transform, _player.NearestMirror.GetCamera(), 0.025f)) SwitchGameMode();
-        }
+            if (!canSwitchModes) return;
 
-        public void SwitchGameMode()
-        {
-            if (!_player.CanSwitchModes) return;
-
-            if (GameMode == GameMode.ThreeD)
+            if (player.GameMode == GameMode.ThreeD)
                 TrySwitch3Dto2D();
             else
                 Switch2Dto3D();
         }
 
+        private void CheckMirrorBoundaries()
+        {
+            if (IsOutOfFOV()) SwitchGameMode();
+        }
+
+        private bool IsOutOfFOV()
+        {
+            return !Utilities.IsVisible(player.transform, player.NearestMirror.GetCamera(), 0.025f);
+        }
+
         private void TrySwitch3Dto2D()
         {
-            if (!_player.NearestMirror)
+            if (!player.NearestMirror)
             {
-                _player.OnGameModeChangeFailEvent?.Invoke();
+                OnGameModeChangeFailEvent?.Invoke();
                 return;
             }
 
-            var mirrorCam = _player.NearestMirror.GetCamera();
-            if (!_player.IsMirrorAccessible(mirrorCam))
+            var mirrorCam = player.NearestMirror.GetCamera();
+            if (!player.IsMirrorAccessible(mirrorCam))
             {
-                _player.OnGameModeChangeFailEvent?.Invoke();
+                OnGameModeChangeFailEvent?.Invoke();
                 return;
             }
 
-            Switch3Dto2D(_player.NearestMirror);
+            Switch3Dto2D(player.NearestMirror);
         }
 
         private void Switch3Dto2D(Mirror mirror)
         {
-            _player.NearestMirror.enabled = false;
-            _player.SetMeshEnabled(false);
+            player.NearestMirror.enabled = false;
 
-            GameMode = GameMode.TwoD;
+            player.GameMode = GameMode.TwoD;
 
-            _player.OnGameModeChangeSuccessEvent?.Invoke(GameMode, mirror);
-            _player.MovementStrategy = new Movement2DStrategy(_player);
+            OnGameModeChangeSuccessEvent?.Invoke(player.GameMode, mirror);
+            player.MovementStrategy = new Movement2DStrategy(player);
         }
 
         private void Switch2Dto3D()
         {
-            _player.NearestMirror.enabled = true;
-            _player.SetMeshEnabled(true);
-            _player.SetJumpBlock(false);
+            player.NearestMirror.enabled = true;
+            player.IsJumpBlocked = false;
 
-            GameMode = GameMode.ThreeD;
+            player.GameMode = GameMode.ThreeD;
 
-            _player.OnGameModeChangeSuccessEvent?.Invoke(GameMode, null);
-            _player.MovementStrategy = new Movement3DStrategy(_player);
+            OnGameModeChangeSuccessEvent?.Invoke(player.GameMode, null);
+            player.MovementStrategy = new Movement3DStrategy(player);
         }
     }
 }

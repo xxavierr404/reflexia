@@ -23,8 +23,8 @@ public class Movement2DStrategy : IMovementStrategy
 
     public void Move(Vector3 moveVector, Mirror mirror)
     {
-        var playerRigidbody = _player.GetRigidbody();
-        var speed = _player.GetSpeed();
+        var playerRigidbody = _player.Rigidbody;
+        var speed = _player.Speed;
         _mirrorCam = _mirrorCam ? _mirrorCam : mirror.GetCamera().transform;
         moveVector.z = 0;
         moveVector = mirror.transform.TransformDirection(moveVector);
@@ -59,11 +59,11 @@ public class Movement2DStrategy : IMovementStrategy
         if (CheckVerticalCollisionOnHead(playerRigidbody)) //Обработка столкновений головой
         {
             playerRigidbody.AddForce(Vector3.down * 3, ForceMode.VelocityChange);
-            _player.SetJumpBlock(true);
+            _player.IsJumpBlocked = true;
         }
         else
         {
-            _player.SetJumpBlock(false);
+            _player.IsJumpBlocked = false;
         }
 
         if (CheckVerticalCollisionOnFeet(playerRigidbody)) //Приземление на верхнюю грань отражения

@@ -17,8 +17,8 @@ public class Movement3DStrategy : IMovementStrategy
     public void Move(Vector3 moveVector, Mirror mirror)
     {
         _camTransform = Camera.main.transform;
-        var playerRigidbody = _player.GetRigidbody();
-        var speed = _player.GetSpeed();
+        var playerRigidbody = _player.Rigidbody;
+        var speed = _player.Speed;
         if (moveVector.magnitude >= 0.1f)
         {
             var targetAngle = RotatePlayer(moveVector.x, moveVector.z);
@@ -32,7 +32,7 @@ public class Movement3DStrategy : IMovementStrategy
 
     public void StopMovement()
     {
-        _player.GetRigidbody().velocity = Vector3.zero;
+        _player.Rigidbody.velocity = Vector3.zero;
     }
 
     private bool HasObstacleInFront()

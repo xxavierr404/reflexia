@@ -1,15 +1,27 @@
 ﻿using System.Collections;
-using Interfaces;
 using UnityEngine;
 
-namespace Objects.Player
+namespace Player.Abilities
 {
-    public class TimeRewindAbility : IAbility
+    public class TimeRewindAbility : MonoBehaviour
     {
-        public void Use(PlayerController player)
+        private PlayerController _player;
+
+        private void Awake()
         {
-            if (!player.CanRewindTime) return;
-            player.StartCoroutine(TimeShift(player));
+            _player = GetComponent<PlayerController>();
+        }
+
+        private void Start()
+        {
+            _player.OnTimeRewind += () =>
+            {
+                if (_player.GameMode == GameMode.ThreeD)
+                {
+                    return;
+                }   
+                StartCoroutine(TimeShift(_player));
+            };
         }
 
         private IEnumerator TimeShift(PlayerController player)
@@ -20,7 +32,7 @@ namespace Objects.Player
             var timeShiftLocation = manager.IsTeleporting()
                 ? manager.GetLastTeleportPosition() + Vector3.up
                 : player.transform.position;
-            player.GameModeController.SwitchGameMode();
+            player.OnSwitchMode?.Invoke();
             yield return new WaitForSeconds(5);
             player.transform.position = timeShiftLocation;
 
