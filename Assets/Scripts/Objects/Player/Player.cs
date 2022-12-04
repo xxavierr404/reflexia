@@ -2,6 +2,7 @@ using System.Collections;
 using Cinemachine;
 using Interfaces;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -41,6 +42,7 @@ public class Player : MonoBehaviour
         anim = GetComponent<Animator>();
         rigidBody = GetComponent<Rigidbody>();
         rigidBody.freezeRotation = true;
+        PlayerPrefs.SetString("Level", SceneManager.GetActiveScene().name);
 
         _blockJump = false;
         _jumpCount = 0;

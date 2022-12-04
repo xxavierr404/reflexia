@@ -18,7 +18,7 @@ public class Mirror : MonoBehaviour
         _mirrorCam.transform.localEulerAngles =
             new Vector3(0, 180 - transform.eulerAngles.y, 180);
         InitializeTexture();
-        GameManager.GetInstance().AddMirrorToPool(this);
+        MirrorPooler.AddMirror(this);
     }
 
     private void InitializeTexture()

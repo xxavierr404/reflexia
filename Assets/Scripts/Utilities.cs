@@ -65,7 +65,7 @@ public static class Utilities
     
     public static Mirror FindNearestMirror(Transform origin, float maxDistance)
     {
-        var mirrors = GameManager.GetInstance().GetMirrorsPool();
+        var mirrors = MirrorPooler.GetMirrorPool();
         if (mirrors.Count == 0) return null;
         var minDistance = Mathf.Infinity;
         Mirror nearestMirror = null;
