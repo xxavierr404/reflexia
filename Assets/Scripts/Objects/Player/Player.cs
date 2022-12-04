@@ -26,10 +26,10 @@ public class Player : MonoBehaviour
     private static readonly int Running = Animator.StringToHash("Running");
     private static readonly int JumpAnimationId = Animator.StringToHash("Jump");
 
-    public OnKeyPressed OnSpaceEvent { get; set; }
-    private OnKeyPressed OnEKeyEvent { get; set; }
-    private OnKeyPressed OnQKeyEvent { get; set; }
-    private OnKeyPressed OnRKeyEvent { get; set; }
+    public OnKeyPressed OnJump { get; set; }
+    private OnKeyPressed OnItemGrab { get; set; }
+    private OnKeyPressed OnSwitchMode { get; set; }
+    private OnKeyPressed OnTimeRewind { get; set; }
     public OnGameModeChangeSuccess OnGameModeChangeSuccessEvent { get; set; }
     public OnGameModeChangeFail OnGameModeChangeFailEvent { get; set; }
 
@@ -51,12 +51,12 @@ public class Player : MonoBehaviour
 
     private void SetupKeyEvents()
     {
-        OnSpaceEvent += Jump;
-        OnSpaceEvent += () => DialogueManager.GetInstance().ContinueDialogue();
+        OnJump += Jump;
+        OnJump += () => DialogueManager.GetInstance().ContinueDialogue();
 
-        OnQKeyEvent += SwitchGameMode;
+        OnSwitchMode += SwitchGameMode;
 
-        OnEKeyEvent += () =>
+        OnItemGrab += () =>
         {
             if (_gameMode == GameMode.TwoD)
             {
@@ -66,7 +66,7 @@ public class Player : MonoBehaviour
             holder.ToggleHold();
         };
 
-        OnRKeyEvent += () =>
+        OnTimeRewind += () =>
         {
             if (_gameMode != GameMode.TwoD || !GameManager.GetInstance().IsAllowedToSwitchGameModes())
             {
@@ -80,7 +80,26 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && _jumpCount < 2 && !_blockJump) OnSpaceEvent?.Invoke();
+        if (Input.GetButtonDown("Jump") && _jumpCount < 2 && !_blockJump)
+        {
+            OnJump?.Invoke();
+        }
+
+        if (Input.GetButtonDown("Grab/drop"))
+        {
+            OnItemGrab?.Invoke();
+        }
+
+        if (Input.GetButtonDown("Switch Game Mode"))
+        {
+            OnSwitchMode?.Invoke();
+        }
+
+        if (Input.GetButtonDown("Time Rewind"))
+        {
+            OnTimeRewind?.Invoke();
+        }
+        
         CheckJumpConditions();
         _nearestMirror = FindNearestMirror();
         RotateReflection();
@@ -106,6 +125,11 @@ public class Player : MonoBehaviour
         var movementVector = new Vector3(horizontal, 0, vertical);
         anim.SetBool(Running, movementVector.magnitude >= 0.1f);
         _movementManager.Move(movementVector, _nearestMirror);
+
+        if (_gameMode == GameMode.TwoD && !Utilities.IsVisible(transform, _nearestMirror.GetCamera(), 0.025f))
+        {
+            SwitchGameMode();
+        }
     }
 
     private void Jump()
@@ -174,6 +198,7 @@ public class Player : MonoBehaviour
 
         _gameMode = GameMode.TwoD;
         OnGameModeChangeSuccessEvent?.Invoke(_gameMode, mirror);
+        _movementManager = new Movement2DManager(this);
     }
 
     private Mirror FindNearestMirror()
@@ -188,10 +213,12 @@ public class Player : MonoBehaviour
         _blockJump = false;
         _gameMode = GameMode.ThreeD;
         OnGameModeChangeSuccessEvent?.Invoke(_gameMode, null);
+        _movementManager = new Movement3DManager(this);
     }
 
     private IEnumerator TimeShift()
     {
+        _nearestMirror.Freeze();
         var manager = (Movement2DManager) _movementManager;
         var timeShiftLocation = manager.IsTeleporting() 
             ? manager.GetLastTeleportPosition() + Vector3.up 
@@ -199,6 +226,7 @@ public class Player : MonoBehaviour
         SwitchGameMode();
         yield return new WaitForSeconds(5);
         transform.position = timeShiftLocation;
+        _nearestMirror.Unfreeze();
     } 
 
     public Rigidbody GetRigidbody()
@@ -221,7 +249,7 @@ public class Player : MonoBehaviour
         reflection.rotation = FindNearestMirror().GetCamera().transform.rotation;
         reflection.Rotate(0, 0, 180);
     }
-    
+
     public delegate void OnKeyPressed();
 
     public delegate void OnGameModeChangeSuccess(GameMode newGameMode, Mirror mirror);

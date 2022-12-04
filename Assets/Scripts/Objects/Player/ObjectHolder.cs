@@ -54,5 +54,6 @@ public class ObjectHolder : MonoBehaviour
         Movable.GetComponent<Rigidbody>().isKinematic = false;
         _moving = false;
         Movable.gameObject.layer = 8;
+        Movable = null;
     }
 }

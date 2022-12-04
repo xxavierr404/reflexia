@@ -10,8 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7073124978661676696}
   - component: {fileID: 7073124978661676703}
-  - component: {fileID: 7073124978661676701}
-  - component: {fileID: 7073124978661676702}
   - component: {fileID: 2321227652939222095}
   - component: {fileID: 9139507679733333881}
   m_Layer: 0
@@ -47,37 +45,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5dc4fb8ff5d547cd95debd9d6686705d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 0}
   activeMirrorsDistance: 30
-  cinemachineBrain: {fileID: 0}
   allowSwitchingGameMode: 0
   allowTimeRewind: 0
   mirrorEnterSFX: {fileID: 8300000, guid: 22acaed7ca74d6d4c8c26036ebe42bd0, type: 3}
   mirrorExitSFX: {fileID: 8300000, guid: 1047e37272231174c8e82032603bc2b5, type: 3}
   failedToSwitch: {fileID: 8300000, guid: 2876e7fa4419a4a7096b8bb38641daa3, type: 3}
---- !u!114 &7073124978661676701
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7073124978661676697}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc64c455c06849e4b32774f5b0f9bbf0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &7073124978661676702
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7073124978661676697}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29f065e3c0f94c0b86ebaa72bc074eaa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2321227652939222095
 MonoBehaviour:
   m_ObjectHideFlags: 0

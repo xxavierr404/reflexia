@@ -87,9 +87,9 @@ public static class Utilities
         return Physics.Raycast(objectToCheck.position, -Vector3.up, 1.05f, ~LayerMask.GetMask("PlayerReflection"));
     }
 
-    public static bool IsTriggeredByPlayer(Collider collider)
+    public static bool IsTriggeredByPlayer(Collision collision)
     {
-        return collider.transform.CompareTag("Player");
+        return collision.transform.CompareTag("Player");
     }
 
     public static bool IsCollidedWithMovable(Collision collision)

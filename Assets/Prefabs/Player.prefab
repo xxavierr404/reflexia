@@ -120,12 +120,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5db4be3fdb7365e49b3ba4f086dfeb55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidBody: {fileID: 0}
+  rigidBody: {fileID: 4439362281923731094}
   jumpMultiplyer: 6
-  speed: 7
-  blockJump: 0
-  playerMesh: {fileID: 830078227213112835}
   reflection: {fileID: 3500076257372757022}
+  holder: {fileID: 8787802343816415700}
+  playerMesh: {fileID: 830078227213112835}
+  speed: 7
   anim: {fileID: 8290004752593264306}
 --- !u!54 &4439362281923731094
 Rigidbody:

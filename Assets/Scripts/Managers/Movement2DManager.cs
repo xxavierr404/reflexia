@@ -15,7 +15,7 @@ public class Movement2DManager : IMovementManager
     public Movement2DManager(Player player)
     {
         this.player = player;
-        player.OnSpaceEvent += () =>
+        player.OnJump += () =>
         {
             _reflectionTeleport = false;
         };
@@ -27,6 +27,7 @@ public class Movement2DManager : IMovementManager
         var playerRigidbody = player.GetRigidbody();
         var speed = player.GetSpeed();
         _mirrorCam = _mirrorCam ? _mirrorCam : mirror.GetCamera().transform;
+        moveVector.z = 0; //Обнуление z-компоненты движения
         moveVector = mirror.transform.TransformDirection(moveVector);
         
         ProcessHorizontalCollision(moveVector, playerRigidbody, speed);
@@ -35,7 +36,6 @@ public class Movement2DManager : IMovementManager
 
     private void ProcessHorizontalCollision(Vector3 moveVector, Rigidbody playerRigidbody, float speed)
     {
-        moveVector.z = 0; //Обнуление z-компоненты движения
         if (moveVector.magnitude >= 0.1f) _moveSign = Mathf.Sign(moveVector.x);
         if (!CheckHorizontalCollision(playerRigidbody, moveVector) &&
             !CheckHorizontalCollisionOnCenter(playerRigidbody)) //Движение при отсутствии препятствий на горизонтали

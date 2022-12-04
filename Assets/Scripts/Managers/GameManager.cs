@@ -121,8 +121,8 @@ public class GameManager : MonoBehaviour
 
     private void AnimateCameraToMirror(Transform mirror)
     {
-        _focus = StartCoroutine(Utilities.Focus(_camera.transform, transform));
-        StartCoroutine(Utilities.LerpRotation(_camera.transform, transform, 2.0f));
+        _focus = StartCoroutine(Utilities.Focus(_camera.transform, mirror));
+        StartCoroutine(Utilities.LerpRotation(_camera.transform, mirror, 2.0f));
     }
 
     private void StopFocus()
