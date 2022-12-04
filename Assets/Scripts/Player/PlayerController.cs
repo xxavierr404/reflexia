@@ -52,13 +52,25 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetButtonDown("Jump") && JumpCount < 2 && !IsJumpBlocked) OnJump?.Invoke();
+        if (Input.GetButtonDown("Jump") && JumpCount < 2 && !IsJumpBlocked)
+        {
+            OnJump?.Invoke();
+        }
 
-        if (Input.GetButtonDown("Grab/drop")) OnItemGrab?.Invoke();
+        if (Input.GetButtonDown("Grab/drop"))
+        {
+            OnItemGrab?.Invoke();
+        }
 
-        if (Input.GetButtonDown("Switch Game Mode")) OnSwitchMode?.Invoke();
+        if (Input.GetButtonDown("Switch Game Mode"))
+        {
+            OnSwitchMode?.Invoke();
+        }
 
-        if (Input.GetButtonDown("Time Rewind")) OnTimeRewind?.Invoke();
+        if (Input.GetButtonDown("Time Rewind"))
+        {
+            OnTimeRewind?.Invoke();
+        }
 
         CheckJumpConditions();
         
