@@ -8,22 +8,22 @@ namespace Managers
     public class CameraEffects : MonoBehaviour
     {
         [SerializeField] private PlayerController player;
-        
-        private ChromaticAberration _chromaticAberration;
-        private Vignette _vignette;
-        private Coroutine _focus;
         private Camera _camera;
+
+        private ChromaticAberration _chromaticAberration;
         private CinemachineBrain _cinemachineBrain;
-        
+        private Coroutine _focus;
+        private Vignette _vignette;
+
         private void Start()
         {
             _camera = Camera.main;
             _cinemachineBrain = _camera.GetComponent<CinemachineBrain>();
-            
+
             SetupVignette();
             SetupAberration();
             PostProcessManager.instance.QuickVolume(11, 0, _vignette, _chromaticAberration);
-            
+
             player.OnGameModeChangeSuccessEvent += (newGameMode, mirror) =>
             {
                 StopFocus();
@@ -40,7 +40,7 @@ namespace Managers
 
             player.OnTimeRewind += StartTimeShiftFX;
         }
-        
+
         private void StopIgnoring3DLayer()
         {
             Physics.IgnoreLayerCollision(7, 9, false);
@@ -102,10 +102,7 @@ namespace Managers
 
         private void StopFocus()
         {
-            if (_focus != null)
-            {
-                StopCoroutine(_focus);
-            }
+            if (_focus != null) StopCoroutine(_focus);
         }
     }
 }

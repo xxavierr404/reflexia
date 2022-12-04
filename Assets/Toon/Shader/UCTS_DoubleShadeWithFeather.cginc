@@ -130,11 +130,12 @@ uniform fixed _Inverse_Z_Axis_BLD;
             uniform fixed _Inverse_Clipping;
 #elif _IS_CLIPPING_TRANSMODE
 //DoubleShadeWithFeather_TransClipping
-            uniform sampler2D _ClippingMask; uniform float4 _ClippingMask_ST;
-            uniform fixed _IsBaseMapAlphaAsClippingMask;
-            uniform float _Clipping_Level;
-            uniform fixed _Inverse_Clipping;
-            uniform float _Tweak_transparency;
+uniform sampler2D _ClippingMask;
+uniform float4 _ClippingMask_ST;
+uniform fixed _IsBaseMapAlphaAsClippingMask;
+uniform float _Clipping_Level;
+uniform fixed _Inverse_Clipping;
+uniform float _Tweak_transparency;
 #elif _IS_CLIPPING_OFF
 //DoubleShadeWithFeather
 #endif
@@ -218,13 +219,15 @@ float4 frag(VertexOutput i, fixed facing : VFACE) : SV_TARGET
                 float Set_Clipping = saturate((lerp( _ClippingMask_var.r, (1.0 - _ClippingMask_var.r), _Inverse_Clipping )+_Clipping_Level));
                 clip(Set_Clipping - 0.5);
     #elif _IS_CLIPPING_TRANSMODE
-//DoubleShadeWithFeather_TransClipping
-                float4 _ClippingMask_var = tex2D(_ClippingMask,TRANSFORM_TEX(Set_UV0, _ClippingMask));
-                float Set_MainTexAlpha = _MainTex_var.a;
-                float _IsBaseMapAlphaAsClippingMask_var = lerp( _ClippingMask_var.r, Set_MainTexAlpha, _IsBaseMapAlphaAsClippingMask );
-                float _Inverse_Clipping_var = lerp( _IsBaseMapAlphaAsClippingMask_var, (1.0 - _IsBaseMapAlphaAsClippingMask_var), _Inverse_Clipping );
-                float Set_Clipping = saturate((_Inverse_Clipping_var+_Clipping_Level));
-                clip(Set_Clipping - 0.5);
+    //DoubleShadeWithFeather_TransClipping
+    float4 _ClippingMask_var = tex2D(_ClippingMask,TRANSFORM_TEX(Set_UV0, _ClippingMask));
+    float Set_MainTexAlpha = _MainTex_var.a;
+    float _IsBaseMapAlphaAsClippingMask_var =
+        lerp(_ClippingMask_var.r, Set_MainTexAlpha, _IsBaseMapAlphaAsClippingMask);
+    float _Inverse_Clipping_var = lerp(_IsBaseMapAlphaAsClippingMask_var, (1.0 - _IsBaseMapAlphaAsClippingMask_var),
+                                       _Inverse_Clipping);
+    float Set_Clipping = saturate((_Inverse_Clipping_var + _Clipping_Level));
+    clip(Set_Clipping - 0.5);
 
     #elif _IS_CLIPPING_OFF
     //DoubleShadeWithFeather
@@ -482,12 +485,12 @@ float4 frag(VertexOutput i, fixed facing : VFACE) : SV_TARGET
 	                fixed4 finalRGBA = fixed4(finalColor,0);
     #endif
     #elif _IS_CLIPPING_TRANSMODE
-//DoubleShadeWithFeather_TransClipping
-    				float Set_Opacity = saturate((_Inverse_Clipping_var+_Tweak_transparency));
+    //DoubleShadeWithFeather_TransClipping
+    float Set_Opacity = saturate((_Inverse_Clipping_var + _Tweak_transparency));
     #ifdef _IS_PASS_FWDBASE
                 	fixed4 finalRGBA = fixed4(finalColor,Set_Opacity);
     #elif _IS_PASS_FWDDELTA
-                	fixed4 finalRGBA = fixed4(finalColor * Set_Opacity,0);
+    fixed4 finalRGBA = fixed4(finalColor * Set_Opacity, 0);
     #endif
     #endif
     UNITY_APPLY_FOG(i.fogCoord, finalRGBA);

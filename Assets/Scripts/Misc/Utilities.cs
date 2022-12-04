@@ -62,7 +62,7 @@ public static class Utilities
         return pos.x < 1f + tolerancy && pos.x > -tolerancy && pos.y < 1f + tolerancy && pos.y > -tolerancy &&
                pos.z > 0;
     }
-    
+
     public static Mirror FindNearestMirror(Transform origin, float maxDistance)
     {
         var mirrors = MirrorPooler.GetMirrorPool();

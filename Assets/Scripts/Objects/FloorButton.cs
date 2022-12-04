@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class FloorButton : MonoBehaviour
 {
+    private static readonly int IsPressed = Animator.StringToHash("IsPressed");
     [SerializeField] private List<Togglable> targets;
 
     private Animator _anim;
-    private static readonly int IsPressed = Animator.StringToHash("IsPressed");
 
     private void Awake()
     {

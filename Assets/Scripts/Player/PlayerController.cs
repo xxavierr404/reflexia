@@ -5,16 +5,29 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
+    public delegate void OnGameModeChangeFail();
+
+    public delegate void OnGameModeChangeSuccess(GameMode newGameMode, Mirror mirror);
+
+    public delegate void OnKeyPressed();
+
+    public delegate void OnMove(Vector3 moveVector);
+
     private const float MirrorVisibilityTolerancy = 0.025F;
-    
+
+
+    private static readonly int MidAir = Animator.StringToHash("MidAir");
+    private static readonly int Running = Animator.StringToHash("Running");
+    private static readonly int JumpAnimationId = Animator.StringToHash("Jump");
+
     [SerializeField] private Rigidbody rigidBody;
     [SerializeField] private float speed;
     [SerializeField] private float jumpMultiplyer;
-    
+
     [SerializeField] private Transform reflection;
     [SerializeField] private SkinnedMeshRenderer playerMesh;
     [SerializeField] private Animator anim;
-    
+
     [SerializeField] private ObjectHolder holder;
     [SerializeField] private bool canSwitchModes;
     [SerializeField] private bool canRewindTime;
@@ -23,11 +36,6 @@ public class PlayerController : MonoBehaviour
     private bool _blockJump;
     private short _jumpCount;
     private short _jumpFrameDelay;
-
-
-    private static readonly int MidAir = Animator.StringToHash("MidAir");
-    private static readonly int Running = Animator.StringToHash("Running");
-    private static readonly int JumpAnimationId = Animator.StringToHash("Jump");
 
     public bool CanSwitchModes => canSwitchModes;
     public bool CanRewindTime => canRewindTime;
@@ -56,92 +64,24 @@ public class PlayerController : MonoBehaviour
         _jumpFrameDelay = Utilities.FramesDelay;
 
         SetupKeyEvents();
-        
+
         MovementStrategy = new Movement3DStrategy(this);
         GameModeController = new GameModeController(this);
     }
 
-    private void SetupKeyEvents()
-    {
-        OnJump += () => {
-            Jump();
-            DialogueManager.GetInstance().ContinueDialogue();
-        };
-
-        OnMoveEvent += (movementVector) =>
-        {
-            anim.SetBool(Running, movementVector.magnitude >= 0.1f);
-            MovementStrategy.Move(movementVector, NearestMirror);
-            GameModeController.CheckMirrorBoundaries();
-        };
-        
-        OnSwitchMode += GameModeController.SwitchGameMode;
-
-        OnItemGrab += () =>
-        {
-            if (GameModeController.GameMode == GameMode.TwoD)
-            {
-                return;
-            }
-
-            holder.ToggleHold();
-        };
-
-        OnTimeRewind += () =>
-        {
-            if (GameModeController.GameMode != GameMode.TwoD || !canRewindTime)
-            {
-                return;
-            }
-
-            var ability = new TimeRewindAbility();
-            ability.Use(this);
-        };
-         
-        OnGameModeChangeSuccessEvent += (newGameMode, mirror) => MovementStrategy.StopMovement();
-    }
-
     private void Update()
     {
-        if (Input.GetButtonDown("Jump") && _jumpCount < 2 && !_blockJump)
-        {
-            OnJump?.Invoke();
-        }
+        if (Input.GetButtonDown("Jump") && _jumpCount < 2 && !_blockJump) OnJump?.Invoke();
 
-        if (Input.GetButtonDown("Grab/drop"))
-        {
-            OnItemGrab?.Invoke();
-        }
+        if (Input.GetButtonDown("Grab/drop")) OnItemGrab?.Invoke();
 
-        if (Input.GetButtonDown("Switch Game Mode"))
-        {
-            OnSwitchMode?.Invoke();
-        }
+        if (Input.GetButtonDown("Switch Game Mode")) OnSwitchMode?.Invoke();
 
-        if (Input.GetButtonDown("Time Rewind"))
-        {
-            OnTimeRewind?.Invoke();
-        }
-        
+        if (Input.GetButtonDown("Time Rewind")) OnTimeRewind?.Invoke();
+
         CheckJumpConditions();
         NearestMirror = FindNearestMirror();
         RotateReflection();
-    }
-
-            private Mirror FindNearestMirror()
-            {
-                return Utilities.FindNearestMirror(transform, activeMirrorsDistance);
-            }
-    
-    private void CheckJumpConditions()
-    {
-        if (_jumpFrameDelay == 0 && Utilities.IsGrounded(transform))
-        {
-            _jumpCount = 0;
-            anim.SetBool(MidAir, false);
-        }
-
-        if (_jumpFrameDelay > 0) _jumpFrameDelay--;
     }
 
     private void FixedUpdate()
@@ -154,6 +94,57 @@ public class PlayerController : MonoBehaviour
         OnMoveEvent?.Invoke(movementVector);
     }
 
+    private void SetupKeyEvents()
+    {
+        OnJump += () =>
+        {
+            Jump();
+            DialogueManager.GetInstance().ContinueDialogue();
+        };
+
+        OnMoveEvent += movementVector =>
+        {
+            anim.SetBool(Running, movementVector.magnitude >= 0.1f);
+            MovementStrategy.Move(movementVector, NearestMirror);
+            GameModeController.CheckMirrorBoundaries();
+        };
+
+        OnSwitchMode += GameModeController.SwitchGameMode;
+
+        OnItemGrab += () =>
+        {
+            if (GameModeController.GameMode == GameMode.TwoD) return;
+
+            holder.ToggleHold();
+        };
+
+        OnTimeRewind += () =>
+        {
+            if (GameModeController.GameMode != GameMode.TwoD || !canRewindTime) return;
+
+            var ability = new TimeRewindAbility();
+            ability.Use(this);
+        };
+
+        OnGameModeChangeSuccessEvent += (newGameMode, mirror) => MovementStrategy.StopMovement();
+    }
+
+    private Mirror FindNearestMirror()
+    {
+        return Utilities.FindNearestMirror(transform, activeMirrorsDistance);
+    }
+
+    private void CheckJumpConditions()
+    {
+        if (_jumpFrameDelay == 0 && Utilities.IsGrounded(transform))
+        {
+            _jumpCount = 0;
+            anim.SetBool(MidAir, false);
+        }
+
+        if (_jumpFrameDelay > 0) _jumpFrameDelay--;
+    }
+
     private void Jump()
     {
         if (_jumpCount == 0) anim.SetTrigger(JumpAnimationId);
@@ -163,17 +154,17 @@ public class PlayerController : MonoBehaviour
         _jumpCount++;
     }
 
-            public bool IsMirrorAccessible(Camera mirrorCam)
-            {
-                Transform camTransform = mirrorCam.transform;
-                var camPos = camTransform.position;
-                return Utilities.IsVisible(transform, mirrorCam, MirrorVisibilityTolerancy)
-                       || Physics.Raycast(camPos,
-                           transform.position - camPos,
-                           activeMirrorsDistance,
-                           1 << 9);
-            }
-    
+    public bool IsMirrorAccessible(Camera mirrorCam)
+    {
+        var camTransform = mirrorCam.transform;
+        var camPos = camTransform.position;
+        return Utilities.IsVisible(transform, mirrorCam, MirrorVisibilityTolerancy)
+               || Physics.Raycast(camPos,
+                   transform.position - camPos,
+                   activeMirrorsDistance,
+                   1 << 9);
+    }
+
     public Rigidbody GetRigidbody()
     {
         return rigidBody;
@@ -188,7 +179,7 @@ public class PlayerController : MonoBehaviour
     {
         _blockJump = block;
     }
-    
+
     private void RotateReflection()
     {
         reflection.rotation = FindNearestMirror().GetCamera().transform.rotation;
@@ -199,12 +190,4 @@ public class PlayerController : MonoBehaviour
     {
         playerMesh.enabled = state;
     }
-    
-    public delegate void OnKeyPressed();
-
-    public delegate void OnGameModeChangeSuccess(GameMode newGameMode, Mirror mirror);
-
-    public delegate void OnGameModeChangeFail();
-    
-    public delegate void OnMove(Vector3 moveVector);
 }

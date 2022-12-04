@@ -3,14 +3,14 @@ using UnityEngine;
 
 public class Movement3DStrategy : IMovementStrategy
 {
-    private PlayerController _player;
-    private float _turnSmooth; //Скорость поворота игрока
     private Transform _camTransform; //Transform камеры игрока
     private Transform _mirrorCam; //Transform камеры ближайшего зеркала
+    private readonly PlayerController _player;
+    private float _turnSmooth; //Скорость поворота игрока
 
     public Movement3DStrategy(PlayerController player)
     {
-        this._player = player;
+        _player = player;
         _turnSmooth = 0.1f;
     }
 
@@ -25,10 +25,8 @@ public class Movement3DStrategy : IMovementStrategy
             moveVector = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward;
             var velocity = playerRigidbody.velocity;
             if (!HasObstacleInFront())
-            {
                 playerRigidbody.AddForce(moveVector * speed - new Vector3(velocity.x, 0, velocity.z),
                     ForceMode.VelocityChange);
-            }
         }
     }
 
@@ -36,11 +34,11 @@ public class Movement3DStrategy : IMovementStrategy
     {
         _player.GetRigidbody().velocity = Vector3.zero;
     }
-    
+
     private bool HasObstacleInFront()
     {
         var transform = _player.transform;
-        return Physics.Raycast(transform.position, 
+        return Physics.Raycast(transform.position,
             transform.forward,
             1f,
             ~(1 << 8));
@@ -49,7 +47,7 @@ public class Movement3DStrategy : IMovementStrategy
     private float RotatePlayer(float horizontal, float vertical)
     {
         var targetAngle = Mathf.Atan2(horizontal, vertical) * Mathf.Rad2Deg + _camTransform.eulerAngles.y;
-        var angle = Mathf.SmoothDampAngle(_player.transform.eulerAngles.y, 
+        var angle = Mathf.SmoothDampAngle(_player.transform.eulerAngles.y,
             targetAngle,
             ref _turnSmooth,
             0.1f);

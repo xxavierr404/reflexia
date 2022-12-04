@@ -5,10 +5,10 @@ using UnityEditor;
 
 namespace Broccoli.Controller
 {
-	/// <summary>
-	///     Controls a Tree Broccoli Instances.
-	/// </summary>
-	[ExecuteInEditMode]
+    /// <summary>
+    ///     Controls a Tree Broccoli Instances.
+    /// </summary>
+    [ExecuteInEditMode]
     public class BroccoTreeController_1_2_5 : MonoBehaviour
     {
         #region Static Constructor
@@ -239,10 +239,10 @@ namespace Broccoli.Controller
 #endif
         }
 #if UNITY_EDITOR
-	    /// <summary>
-	    ///     Raises the enable event.
-	    /// </summary>
-	    private void OnEnable()
+        /// <summary>
+        ///     Raises the enable event.
+        /// </summary>
+        private void OnEnable()
         {
 #if UNITY_2017_2_OR_NEWER
             EditorApplication.playModeStateChanged += StateChange;
@@ -254,10 +254,10 @@ namespace Broccoli.Controller
 #endif
         }
 
-	    /// <summary>
-	    ///     Raises the disable event.
-	    /// </summary>
-	    private void OnDisable()
+        /// <summary>
+        ///     Raises the disable event.
+        /// </summary>
+        private void OnDisable()
         {
 #if UNITY_2017_2_OR_NEWER
             EditorApplication.playModeStateChanged += StateChange;
@@ -269,10 +269,10 @@ namespace Broccoli.Controller
 #endif
         }
 
-	    /// <summary>
-	    ///     Editor state has changed.
-	    /// </summary>
-	    private void StateChangeFormer()
+        /// <summary>
+        ///     Editor state has changed.
+        /// </summary>
+        private void StateChangeFormer()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode && EditorApplication.isPlaying)
                 editorWindEnabled = windType != WindType.None;

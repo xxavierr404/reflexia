@@ -146,8 +146,9 @@ float4 frag(VertexOutput i) : SV_Target
     float3 _OutlineTex_var = tex2D(_OutlineTex,TRANSFORM_TEX(Set_UV0, _OutlineTex));
     //v.2.0.7.5
     #ifdef _IS_OUTLINE_CLIPPING_NO
-                float3 Set_Outline_Color = lerp(_Is_BlendBaseColor_var, _OutlineTex_var.rgb*_Outline_Color.rgb*lightColor, _Is_OutlineTex );
-                return float4(Set_Outline_Color,1.0);
+    float3 Set_Outline_Color = lerp(_Is_BlendBaseColor_var, _OutlineTex_var.rgb * _Outline_Color.rgb * lightColor,
+                                    _Is_OutlineTex);
+    return float4(Set_Outline_Color, 1.0);
     #elif _IS_OUTLINE_CLIPPING_YES
     float4 _ClippingMask_var = tex2D(_ClippingMask,TRANSFORM_TEX(Set_UV0, _ClippingMask));
     float Set_MainTexAlpha = _MainTex_var.a;

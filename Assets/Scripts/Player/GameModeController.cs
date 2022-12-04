@@ -3,37 +3,28 @@
     public class GameModeController
     {
         private readonly PlayerController _player;
-        public GameMode GameMode { get; private set; }
-        
+
         public GameModeController(PlayerController player)
         {
             _player = player;
             GameMode = GameMode.ThreeD;
         }
 
+        public GameMode GameMode { get; private set; }
+
         public void CheckMirrorBoundaries()
         {
-            if (!Utilities.IsVisible(_player.transform, _player.NearestMirror.GetCamera(), 0.025f))
-            {
-                SwitchGameMode();
-            }
+            if (!Utilities.IsVisible(_player.transform, _player.NearestMirror.GetCamera(), 0.025f)) SwitchGameMode();
         }
 
         public void SwitchGameMode()
         {
-            if (!_player.CanSwitchModes)
-            {
-                return;
-            }
-            
+            if (!_player.CanSwitchModes) return;
+
             if (GameMode == GameMode.ThreeD)
-            {
                 TrySwitch3Dto2D();
-            }
             else
-            {
                 Switch2Dto3D();
-            }
         }
 
         private void TrySwitch3Dto2D()
@@ -58,9 +49,9 @@
         {
             _player.NearestMirror.enabled = false;
             _player.SetMeshEnabled(false);
-            
+
             GameMode = GameMode.TwoD;
-            
+
             _player.OnGameModeChangeSuccessEvent?.Invoke(GameMode, mirror);
             _player.MovementStrategy = new Movement2DStrategy(_player);
         }
@@ -72,7 +63,7 @@
             _player.SetJumpBlock(false);
 
             GameMode = GameMode.ThreeD;
-            
+
             _player.OnGameModeChangeSuccessEvent?.Invoke(GameMode, null);
             _player.MovementStrategy = new Movement3DStrategy(_player);
         }

@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class Mirror : MonoBehaviour
 {
-    private Transform _camTransform;
-    private Vector3 _lastRotation; 
-    private Camera _mirrorCam;
     private static readonly int MainTex = Shader.PropertyToID("_MainTex");
+    private Transform _camTransform;
+    private Vector3 _lastRotation;
+    private Camera _mirrorCam;
+    private Material _mirrorMaterial;
     private RenderTexture _mirrorTexture;
     private RenderTexture _previousTexture;
-    private Material _mirrorMaterial;
 
     private void Awake()
     {
@@ -21,6 +21,15 @@ public class Mirror : MonoBehaviour
         MirrorPooler.AddMirror(this);
     }
 
+    private void Update()
+    {
+        var eulerAngles = _camTransform.eulerAngles;
+        var delta = eulerAngles - _lastRotation;
+        delta.z = 0;
+        _mirrorCam.transform.localEulerAngles += delta;
+        _lastRotation = eulerAngles;
+    }
+
     private void InitializeTexture()
     {
         _mirrorTexture = new RenderTexture(1024, 1024, 0);
@@ -29,15 +38,6 @@ public class Mirror : MonoBehaviour
         _mirrorMaterial.SetTexture(MainTex, _mirrorTexture);
         transform.Find("Border").GetComponent<MeshRenderer>().material =
             _mirrorMaterial;
-    }
-
-    private void Update()
-    {
-        var eulerAngles = _camTransform.eulerAngles;
-        var delta = eulerAngles - _lastRotation;
-        delta.z = 0;
-        _mirrorCam.transform.localEulerAngles += delta;
-        _lastRotation = eulerAngles;
     }
 
     public void Freeze()

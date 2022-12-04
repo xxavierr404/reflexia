@@ -3,24 +3,21 @@ using UnityEngine;
 
 public class Movement2DStrategy : IMovementStrategy
 {
-    private readonly PlayerController _player;
     private readonly LayerMask _layerMask; //Маска слоёв для рейкастов обработки коллизии отражений
+    private readonly PlayerController _player;
+
+    private Transform _mirrorCam; //Камера ближайшего зеркала
+    private RaycastHit _mirrorTeleportCollision; //Информация о последней коллизии "ног" игрока с отражением в зеркале
 
 
     private float _moveSign; //Направление последнего движения по локальной оси X зеркала
-
-    private Transform _mirrorCam; //Камера ближайшего зеркала
     private bool _reflectionTeleport;
     private Vector3 _teleportPosition;
-    private RaycastHit _mirrorTeleportCollision; //Информация о последней коллизии "ног" игрока с отражением в зеркале
 
     public Movement2DStrategy(PlayerController player)
     {
         _player = player;
-        player.OnJump += () =>
-        {
-            _reflectionTeleport = false;
-        };
+        player.OnJump += () => { _reflectionTeleport = false; };
         _layerMask = LayerMask.GetMask("MirrorPlatforms", "MovablePlatforms");
     }
 
@@ -31,9 +28,14 @@ public class Movement2DStrategy : IMovementStrategy
         _mirrorCam = _mirrorCam ? _mirrorCam : mirror.GetCamera().transform;
         moveVector.z = 0;
         moveVector = mirror.transform.TransformDirection(moveVector);
-        
+
         ProcessHorizontalCollision(moveVector, playerRigidbody, speed);
         ProcessVerticalCollision(playerRigidbody);
+    }
+
+    public void StopMovement()
+    {
+        if (_reflectionTeleport) _player.transform.position = _teleportPosition + _player.transform.up;
     }
 
     private void ProcessHorizontalCollision(Vector3 moveVector, Rigidbody playerRigidbody, float speed)
@@ -73,14 +75,6 @@ public class Movement2DStrategy : IMovementStrategy
         }
     }
 
-    public void StopMovement()
-    {
-        if (_reflectionTeleport)
-        {
-            _player.transform.position = _teleportPosition + _player.transform.up;
-        }
-    }
-
     public bool IsTeleporting()
     {
         return _reflectionTeleport;
@@ -112,8 +106,8 @@ public class Movement2DStrategy : IMovementStrategy
         var position = _mirrorCam.position;
         var mirrorCollisionRayHorizontal = new Ray(position,
             rigidbody.transform.position
-            + new Vector3(0.5f * _moveSign, 
-                Mathf.Clamp(rigidbody.velocity.y * -2.0f, -1.0f, 1.0f), 
+            + new Vector3(0.5f * _moveSign,
+                Mathf.Clamp(rigidbody.velocity.y * -2.0f, -1.0f, 1.0f),
                 0)
             - position);
         return Physics.Raycast(mirrorCollisionRayHorizontal, Mathf.Infinity, _layerMask);

@@ -194,15 +194,15 @@ struct VertexOutput
     float2 uv0 : TEXCOORD0;
     //v.2.0.4
     #ifdef _IS_ANGELRING_OFF
-                float4 posWorld : TEXCOORD1;
-                float3 normalDir : TEXCOORD2;
-                float3 tangentDir : TEXCOORD3;
-                float3 bitangentDir : TEXCOORD4;
-                //v.2.0.7
-                float mirrorFlag : TEXCOORD5;
-                LIGHTING_COORDS(6,7)
-                UNITY_FOG_COORDS(8)
-                //
+    float4 posWorld : TEXCOORD1;
+    float3 normalDir : TEXCOORD2;
+    float3 tangentDir : TEXCOORD3;
+    float3 bitangentDir : TEXCOORD4;
+    //v.2.0.7
+    float mirrorFlag : TEXCOORD5;
+    LIGHTING_COORDS(6, 7)
+    UNITY_FOG_COORDS(8)
+    //
     #elif _IS_ANGELRING_ON
     float2 uv1 : TEXCOORD1;
     float4 posWorld : TEXCOORD2;
@@ -485,8 +485,8 @@ float4 frag(VertexOutput i, fixed facing : VFACE) : SV_TARGET
     float3 matCapColorFinal = lerp(matCapColorOnMultiplyMode, matCapColorOnAddMode, _Is_BlendAddToMatCap);
     //v.2.0.4
     #ifdef _IS_ANGELRING_OFF
-                float3 finalColor = lerp(_RimLight_var, matCapColorFinal, _MatCap);// Final Composition before Emissive
-                //
+    float3 finalColor = lerp(_RimLight_var, matCapColorFinal, _MatCap); // Final Composition before Emissive
+    //
     #elif _IS_ANGELRING_ON
     float3 finalColor = lerp(_RimLight_var, matCapColorFinal, _MatCap); // Final Composition before AR
     //v.2.0.7 AR Camera Rolling Stabilizer
@@ -599,7 +599,7 @@ float4 frag(VertexOutput i, fixed facing : VFACE) : SV_TARGET
     //v.2.0.4
     #ifdef _IS_TRANSCLIPPING_OFF
     #ifdef _IS_PASS_FWDBASE
-	                fixed4 finalRGBA = fixed4(finalColor,1);
+    fixed4 finalRGBA = fixed4(finalColor, 1);
     #elif _IS_PASS_FWDDELTA
 	                fixed4 finalRGBA = fixed4(finalColor,0);
     #endif
