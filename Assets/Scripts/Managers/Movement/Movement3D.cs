@@ -1,14 +1,14 @@
 ﻿using Interfaces;
 using UnityEngine;
 
-public class Movement3DManager : IMovementManager
+public class Movement3DStrategy : IMovementStrategy
 {
-    private Player _player;
+    private PlayerController _player;
     private float _turnSmooth; //Скорость поворота игрока
     private Transform _camTransform; //Transform камеры игрока
     private Transform _mirrorCam; //Transform камеры ближайшего зеркала
 
-    public Movement3DManager(Player player)
+    public Movement3DStrategy(PlayerController player)
     {
         this._player = player;
         _turnSmooth = 0.1f;

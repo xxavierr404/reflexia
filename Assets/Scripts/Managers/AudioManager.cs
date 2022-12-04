@@ -4,7 +4,7 @@ namespace Managers
 {
     public class AudioManager : MonoBehaviour
     {
-        [SerializeField] private Player player;
+        [SerializeField] private PlayerController player;
         [SerializeField] private AudioClip mirrorEnterSFX;
         [SerializeField] private AudioClip mirrorExitSFX;
         [SerializeField] private AudioClip failedToSwitch;

@@ -2,7 +2,7 @@
 
 namespace Interfaces
 {
-    public interface IMovementManager
+    public interface IMovementStrategy
     {
         void Move(Vector3 moveVector, Mirror mirror);
         void StopMovement();

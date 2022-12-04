@@ -7,7 +7,7 @@ namespace Managers
 {
     public class CameraEffects : MonoBehaviour
     {
-        [SerializeField] private Player player;
+        [SerializeField] private PlayerController player;
         
         private ChromaticAberration _chromaticAberration;
         private Vignette _vignette;

@@ -1,9 +1,9 @@
 ﻿using Interfaces;
 using UnityEngine;
 
-public class Movement2DManager : IMovementManager
+public class Movement2DStrategy : IMovementStrategy
 {
-    private readonly Player _player;
+    private readonly PlayerController _player;
     private readonly LayerMask _layerMask; //Маска слоёв для рейкастов обработки коллизии отражений
 
 
@@ -14,7 +14,7 @@ public class Movement2DManager : IMovementManager
     private Vector3 _teleportPosition;
     private RaycastHit _mirrorTeleportCollision; //Информация о последней коллизии "ног" игрока с отражением в зеркале
 
-    public Movement2DManager(Player player)
+    public Movement2DStrategy(PlayerController player)
     {
         _player = player;
         player.OnJump += () =>
