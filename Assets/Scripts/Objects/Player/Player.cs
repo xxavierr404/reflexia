@@ -8,14 +8,17 @@ public class Player : MonoBehaviour
     private const float MirrorVisibilityTolerancy = 0.025F;
     
     [SerializeField] private Rigidbody rigidBody;
-    [SerializeField] private float jumpMultiplyer; //Множитель высоты прыжков
-    [SerializeField] private Transform reflection; //Transform отражения игрока в зеркале
+    [SerializeField] private float jumpMultiplyer;
+    [SerializeField] private Transform reflection;
     [SerializeField] private ObjectHolder holder;
-    [SerializeField] private SkinnedMeshRenderer playerMesh; //Mesh модели игрока
-    [SerializeField] private float speed; //Скорость передвижения игрока
+    [SerializeField] private SkinnedMeshRenderer playerMesh;
+    [SerializeField] private float speed;
     [SerializeField] private Animator anim;
+    [SerializeField] private bool canSwitchModes;
+    [SerializeField] private bool canRewindTime;
+    [SerializeField] private float activeMirrorsDistance;
 
-    private bool _blockJump; //Флаг для блокировки прыжков
+    private bool _blockJump;
     private short _jumpCount;
     private short _jumpFrameDelay;
     private GameMode _gameMode;
@@ -27,9 +30,9 @@ public class Player : MonoBehaviour
     private static readonly int JumpAnimationId = Animator.StringToHash("Jump");
 
     public OnKeyPressed OnJump { get; set; }
-    private OnKeyPressed OnItemGrab { get; set; }
-    private OnKeyPressed OnSwitchMode { get; set; }
-    private OnKeyPressed OnTimeRewind { get; set; }
+    public OnKeyPressed OnItemGrab { get; set; }
+    public OnKeyPressed OnSwitchMode { get; set; }
+    public OnKeyPressed OnTimeRewind { get; set; }
     public OnGameModeChangeSuccess OnGameModeChangeSuccessEvent { get; set; }
     public OnGameModeChangeFail OnGameModeChangeFailEvent { get; set; }
 
@@ -68,13 +71,12 @@ public class Player : MonoBehaviour
 
         OnTimeRewind += () =>
         {
-            if (_gameMode != GameMode.TwoD || !GameManager.GetInstance().IsAllowedToSwitchGameModes())
+            if (_gameMode != GameMode.TwoD || !canRewindTime)
             {
                 return;
             }
 
             StartCoroutine(TimeShift());
-            GameManager.GetInstance().StartTimeShiftFX();
         };
     }
 
@@ -143,7 +145,7 @@ public class Player : MonoBehaviour
 
     private void SwitchGameMode()
     {
-        if (!GameManager.GetInstance().IsAllowedToSwitchGameModes())
+        if (!canSwitchModes)
         {
             return;
         }
@@ -184,7 +186,7 @@ public class Player : MonoBehaviour
         return Utilities.IsVisible(transform, mirrorCam, MirrorVisibilityTolerancy)
                || Physics.Raycast(camPos,
                    transform.position - camPos,
-                   GameManager.GetInstance().GetActiveMirrorsDistance(),
+                   activeMirrorsDistance,
                    1 << 9);
     }
 
@@ -203,7 +205,7 @@ public class Player : MonoBehaviour
 
     private Mirror FindNearestMirror()
     {
-        return Utilities.FindNearestMirror(transform, GameManager.GetInstance().GetActiveMirrorsDistance());
+        return Utilities.FindNearestMirror(transform, activeMirrorsDistance);
     }
 
     private void Switch2Dto3D()

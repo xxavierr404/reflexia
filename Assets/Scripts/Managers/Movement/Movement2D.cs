@@ -3,18 +3,20 @@ using UnityEngine;
 
 public class Movement2DManager : IMovementManager
 {
-    private Player player;
+    private readonly Player _player;
+    private readonly LayerMask _layerMask; //Маска слоёв для рейкастов обработки коллизии отражений
+
+
     private float _moveSign; //Направление последнего движения по локальной оси X зеркала
-    private RaycastHit
-        _mirrorTeleportCollision; //Информация о последней коллизии "ног" игрока с отражением в зеркале
-    private LayerMask _layerMask; //Маска слоёв для рейкастов обработки коллизии отражений
+
     private Transform _mirrorCam; //Камера ближайшего зеркала
     private bool _reflectionTeleport;
     private Vector3 _teleportPosition;
-    
+    private RaycastHit _mirrorTeleportCollision; //Информация о последней коллизии "ног" игрока с отражением в зеркале
+
     public Movement2DManager(Player player)
     {
-        this.player = player;
+        _player = player;
         player.OnJump += () =>
         {
             _reflectionTeleport = false;
@@ -24,10 +26,10 @@ public class Movement2DManager : IMovementManager
 
     public void Move(Vector3 moveVector, Mirror mirror)
     {
-        var playerRigidbody = player.GetRigidbody();
-        var speed = player.GetSpeed();
+        var playerRigidbody = _player.GetRigidbody();
+        var speed = _player.GetSpeed();
         _mirrorCam = _mirrorCam ? _mirrorCam : mirror.GetCamera().transform;
-        moveVector.z = 0; //Обнуление z-компоненты движения
+        moveVector.z = 0;
         moveVector = mirror.transform.TransformDirection(moveVector);
         
         ProcessHorizontalCollision(moveVector, playerRigidbody, speed);
@@ -55,16 +57,16 @@ public class Movement2DManager : IMovementManager
         if (CheckVerticalCollisionOnHead(playerRigidbody)) //Обработка столкновений головой
         {
             playerRigidbody.AddForce(Vector3.down * 3, ForceMode.VelocityChange);
-            player.SetJumpBlock(true);
+            _player.SetJumpBlock(true);
         }
         else
         {
-            player.SetJumpBlock(false);
+            _player.SetJumpBlock(false);
         }
 
         if (CheckVerticalCollisionOnFeet(playerRigidbody)) //Приземление на верхнюю грань отражения
         {
-            playerRigidbody.AddForce(player.transform.up - new Vector3(0, playerRigidbody.velocity.y, 0),
+            playerRigidbody.AddForce(_player.transform.up - new Vector3(0, playerRigidbody.velocity.y, 0),
                 ForceMode.VelocityChange);
             _teleportPosition = _mirrorTeleportCollision.point;
             _reflectionTeleport = true;
@@ -75,7 +77,7 @@ public class Movement2DManager : IMovementManager
     {
         if (_reflectionTeleport)
         {
-            player.transform.position = _teleportPosition + player.transform.up;
+            _player.transform.position = _teleportPosition + _player.transform.up;
         }
     }
 
@@ -101,7 +103,7 @@ public class Movement2DManager : IMovementManager
     {
         var transform = rigidbody.transform;
         var position = _mirrorCam.position;
-        var mirrorCollisionRayVertical = new Ray(position, transform.position + transform.up * 0.8f - position);
+        var mirrorCollisionRayVertical = new Ray(position, transform.position + transform.up - position);
         return Physics.Raycast(mirrorCollisionRayVertical, Mathf.Infinity, _layerMask);
     }
 
@@ -109,8 +111,11 @@ public class Movement2DManager : IMovementManager
     {
         var position = _mirrorCam.position;
         var mirrorCollisionRayHorizontal = new Ray(position,
-            rigidbody.transform.position +
-            new Vector3(0.5f * _moveSign, Mathf.Clamp(rigidbody.velocity.y * -2.0f, -1.0f, 1.0f), 0) - position);
+            rigidbody.transform.position
+            + new Vector3(0.5f * _moveSign, 
+                Mathf.Clamp(rigidbody.velocity.y * -2.0f, -1.0f, 1.0f), 
+                0)
+            - position);
         return Physics.Raycast(mirrorCollisionRayHorizontal, Mathf.Infinity, _layerMask);
     }
 
