@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7073124978661676696}
   - component: {fileID: 7073124978661676703}
-  - component: {fileID: 2321227652939222095}
+  - component: {fileID: 1427802978095473482}
   - component: {fileID: 9139507679733333881}
   m_Layer: 0
   m_Name: GameManager
@@ -45,14 +45,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5dc4fb8ff5d547cd95debd9d6686705d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
-  activeMirrorsDistance: 30
-  allowSwitchingGameMode: 0
-  allowTimeRewind: 0
-  mirrorEnterSFX: {fileID: 8300000, guid: 22acaed7ca74d6d4c8c26036ebe42bd0, type: 3}
-  mirrorExitSFX: {fileID: 8300000, guid: 1047e37272231174c8e82032603bc2b5, type: 3}
-  failedToSwitch: {fileID: 8300000, guid: 2876e7fa4419a4a7096b8bb38641daa3, type: 3}
---- !u!114 &2321227652939222095
+--- !u!114 &1427802978095473482
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -61,15 +54,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 7073124978661676697}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 458c5d595e926d747939f1b0c25c5290, type: 3}
+  m_Script: {fileID: 11500000, guid: 23c6d70cdb76435d81b22e30c809505a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dialoguePanel: {fileID: 0}
-  dialogueName: {fileID: 0}
-  dialogueText: {fileID: 0}
-  dialogueSprite: {fileID: 0}
-  animator: {fileID: 0}
-  letterSound: {fileID: 0}
+  gameModeController: {fileID: 0}
+  mirrorEnterSFX: {fileID: 8300000, guid: 22acaed7ca74d6d4c8c26036ebe42bd0, type: 3}
+  mirrorExitSFX: {fileID: 8300000, guid: 1047e37272231174c8e82032603bc2b5, type: 3}
+  failedToSwitch: {fileID: 8300000, guid: 2876e7fa4419a4a7096b8bb38641daa3, type: 3}
 --- !u!82 &9139507679733333881
 AudioSource:
   m_ObjectHideFlags: 0
@@ -80,7 +71,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 4c4b1ad27a676654391e2cc21446cd8f, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.3
   m_Pitch: 1

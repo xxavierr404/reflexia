@@ -16,10 +16,16 @@ namespace Player
         public void Start()
         {
             player.GameMode = GameMode.ThreeD;
-
-            player.OnMoveEvent += (moveVector) => CheckMirrorBoundaries();
             player.OnSwitchMode += SwitchGameMode;
             OnGameModeChangeSuccessEvent += (newGameMode, moveVector) => player.MovementStrategy.StopMovement();
+        }
+
+        public void Update()
+        {
+            if (player.GameMode == GameMode.TwoD)
+            {
+                CheckMirrorBoundaries();
+            }
         }
 
         private void SwitchGameMode()
@@ -39,6 +45,7 @@ namespace Player
 
         private bool IsOutOfFOV()
         {
+            if (!player.NearestMirror) return false;
             return !Utilities.IsVisible(player.transform, player.NearestMirror.GetCamera(), 0.025f);
         }
 
@@ -62,8 +69,9 @@ namespace Player
 
         private void Switch3Dto2D(Mirror mirror)
         {
-            player.NearestMirror.enabled = false;
-
+            mirror.enabled = false;
+            Physics.IgnoreLayerCollision(7, 9);
+            
             player.GameMode = GameMode.TwoD;
 
             OnGameModeChangeSuccessEvent?.Invoke(player.GameMode, mirror);
@@ -74,6 +82,7 @@ namespace Player
         {
             player.NearestMirror.enabled = true;
             player.IsJumpBlocked = false;
+            Physics.IgnoreLayerCollision(7, 9, false);
 
             player.GameMode = GameMode.ThreeD;
 

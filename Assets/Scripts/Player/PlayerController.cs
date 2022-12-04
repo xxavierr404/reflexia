@@ -38,16 +38,15 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        rigidBody = GetComponent<Rigidbody>();
-        rigidBody.freezeRotation = true;
         PlayerPrefs.SetString("Level", SceneManager.GetActiveScene().name);
+        rigidBody.freezeRotation = true;
 
         IsJumpBlocked = false;
         JumpCount = 0;
         _jumpFrameDelay = Utilities.FramesDelay;
 
         SetupKeyEvents();
-
+        
         MovementStrategy = new Movement3DStrategy(this);
     }
 
@@ -68,8 +67,6 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        var manager = DialogueManager.GetInstance();
-        if (manager && manager.DialoguePlaying) return;
         var horizontal = Input.GetAxis("Horizontal");
         var vertical = Input.GetAxis("Vertical");
         var movementVector = new Vector3(horizontal, 0, vertical);
@@ -80,8 +77,13 @@ public class PlayerController : MonoBehaviour
     {
         OnJump += () =>
         {
+            if (_jumpFrameDelay > 0 || JumpCount > 1)
+            {
+                return;
+            }
             Jump();
-            DialogueManager.GetInstance().ContinueDialogue();
+            _jumpFrameDelay = Utilities.FramesDelay;
+            JumpCount++;
         };
 
         OnMoveEvent += movementVector =>
@@ -110,8 +112,6 @@ public class PlayerController : MonoBehaviour
     private void Jump()
     {
         rigidBody.AddForce(Vector3.up * jumpMultiplyer, ForceMode.VelocityChange);
-        _jumpFrameDelay = 5;
-        JumpCount++;
     }
     
     private Mirror FindNearestMirror()

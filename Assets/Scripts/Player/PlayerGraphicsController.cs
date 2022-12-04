@@ -25,14 +25,12 @@ namespace Player
                 {
                     anim.SetBool(MidAir, false);
                 }
-                
-                RotateReflection();
             };
 
             player.OnJump += () =>
             {
                 anim.SetBool(MidAir, true);
-                if (player.JumpCount == 0)
+                if (player.JumpCount == 1)
                 {
                     anim.SetTrigger(JumpAnimationId);
                 }
@@ -46,9 +44,15 @@ namespace Player
                 };
             }
         }
-        
+
+        private void Update()
+        {
+            RotateReflection();
+        }
+
         private void RotateReflection()
         {
+            if (!player.NearestMirror) return;
             reflection.rotation = player.NearestMirror.GetCamera().transform.rotation;
             reflection.Rotate(0, 0, 180);
         }

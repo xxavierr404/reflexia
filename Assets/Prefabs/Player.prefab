@@ -67,6 +67,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4439362281923731083}
   - component: {fileID: 4439362281923731080}
+  - component: {fileID: 991225657351807343}
+  - component: {fileID: 147902903145016817}
+  - component: {fileID: 4313590149677478517}
   - component: {fileID: 4439362281923731095}
   - component: {fileID: 4439362281923731094}
   - component: {fileID: 8290004752593264306}
@@ -108,6 +111,49 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &991225657351807343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4439362281923731093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef06eb8caa814576859581ce8bc296d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &147902903145016817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4439362281923731093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ad8e83609a848a2995b85b87829c6b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 4439362281923731095}
+  gameModeController: {fileID: 4313590149677478517}
+  reflection: {fileID: 3500076257372757022}
+  playerMesh: {fileID: 830078227213112835}
+  anim: {fileID: 8290004752593264306}
+--- !u!114 &4313590149677478517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4439362281923731093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e3a964be4624fdeb7c914f59f2d4b84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canSwitchModes: 1
+  player: {fileID: 4439362281923731095}
 --- !u!114 &4439362281923731095
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -121,12 +167,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rigidBody: {fileID: 4439362281923731094}
-  jumpMultiplyer: 6
-  reflection: {fileID: 3500076257372757022}
-  holder: {fileID: 8787802343816415700}
-  playerMesh: {fileID: 830078227213112835}
   speed: 7
-  anim: {fileID: 8290004752593264306}
+  jumpMultiplyer: 6
+  holder: {fileID: 8787802343816415700}
+  activeMirrorsDistance: 30
 --- !u!54 &4439362281923731094
 Rigidbody:
   m_ObjectHideFlags: 0

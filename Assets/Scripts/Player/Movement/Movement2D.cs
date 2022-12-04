@@ -3,14 +3,13 @@ using UnityEngine;
 
 public class Movement2DStrategy : IMovementStrategy
 {
-    private readonly LayerMask _layerMask; //Маска слоёв для рейкастов обработки коллизии отражений
+    private readonly LayerMask _layerMask;
     private readonly PlayerController _player;
 
-    private Transform _mirrorCam; //Камера ближайшего зеркала
-    private RaycastHit _mirrorTeleportCollision; //Информация о последней коллизии "ног" игрока с отражением в зеркале
-
-
-    private float _moveSign; //Направление последнего движения по локальной оси X зеркала
+    private Transform _mirrorCam;
+    private RaycastHit _mirrorTeleportCollision;
+    
+    private float _moveSign;
     private bool _reflectionTeleport;
     private Vector3 _teleportPosition;
 
@@ -23,19 +22,22 @@ public class Movement2DStrategy : IMovementStrategy
 
     public void Move(Vector3 moveVector, Mirror mirror)
     {
+        _mirrorCam = mirror.GetCamera().transform;
+        moveVector *= -1;
+        moveVector = _mirrorCam.transform.TransformDirection(moveVector);
+
         var playerRigidbody = _player.Rigidbody;
         var speed = _player.Speed;
-        _mirrorCam = _mirrorCam ? _mirrorCam : mirror.GetCamera().transform;
-        moveVector.z = 0;
-        moveVector = mirror.transform.TransformDirection(moveVector);
-
         ProcessHorizontalCollision(moveVector, playerRigidbody, speed);
         ProcessVerticalCollision(playerRigidbody);
     }
 
     public void StopMovement()
     {
-        if (_reflectionTeleport) _player.transform.position = _teleportPosition + _player.transform.up;
+        if (_reflectionTeleport)
+        {
+            _player.transform.position = _teleportPosition + _player.transform.up;
+        }
     }
 
     private void ProcessHorizontalCollision(Vector3 moveVector, Rigidbody playerRigidbody, float speed)
@@ -48,7 +50,7 @@ public class Movement2DStrategy : IMovementStrategy
             playerRigidbody.AddForce(moveVector * speed - new Vector3(velocity.x, 0, velocity.z),
                 ForceMode.VelocityChange);
         }
-        else //Остановка при горизонтальной коллизии с отражением
+        else
         {
             playerRigidbody.velocity = new Vector3(0, playerRigidbody.velocity.y, 0);
         }
@@ -66,13 +68,13 @@ public class Movement2DStrategy : IMovementStrategy
             _player.IsJumpBlocked = false;
         }
 
-        if (CheckVerticalCollisionOnFeet(playerRigidbody)) //Приземление на верхнюю грань отражения
-        {
-            playerRigidbody.AddForce(_player.transform.up - new Vector3(0, playerRigidbody.velocity.y, 0),
-                ForceMode.VelocityChange);
-            _teleportPosition = _mirrorTeleportCollision.point;
-            _reflectionTeleport = true;
-        }
+        if (!CheckVerticalCollisionOnFeet(playerRigidbody)) return;
+        
+        playerRigidbody.AddForce(_player.transform.up 
+                                 - new Vector3(0, playerRigidbody.velocity.y, 0),
+            ForceMode.VelocityChange);
+        _teleportPosition = _mirrorTeleportCollision.point;
+        _reflectionTeleport = true;
     }
 
     public bool IsTeleporting()
@@ -90,7 +92,10 @@ public class Movement2DStrategy : IMovementStrategy
         var transform = rigidbody.transform;
         var position = _mirrorCam.position;
         var mirrorCollisionRayVertical = new Ray(position, transform.position - transform.up - position);
-        return Physics.Raycast(mirrorCollisionRayVertical, out _mirrorTeleportCollision, Mathf.Infinity, _layerMask);
+        return Physics.Raycast(mirrorCollisionRayVertical, 
+            out _mirrorTeleportCollision,
+            Mathf.Infinity,
+            _layerMask);
     }
 
     private bool CheckVerticalCollisionOnHead(Rigidbody rigidbody)

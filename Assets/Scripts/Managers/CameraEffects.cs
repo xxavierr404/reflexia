@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using Cinemachine;
+using Player;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 
@@ -7,6 +9,7 @@ namespace Managers
 {
     public class CameraEffects : MonoBehaviour
     {
+        [SerializeField] private GameModeController gameModeController;
         [SerializeField] private PlayerController player;
         private Camera _camera;
 
@@ -15,7 +18,7 @@ namespace Managers
         private Coroutine _focus;
         private Vignette _vignette;
 
-        private void Start()
+        private void Awake()
         {
             _camera = Camera.main;
             _cinemachineBrain = _camera.GetComponent<CinemachineBrain>();
@@ -23,10 +26,12 @@ namespace Managers
             SetupVignette();
             SetupAberration();
             PostProcessManager.instance.QuickVolume(11, 0, _vignette, _chromaticAberration);
+        }
 
-            player.OnGameModeChangeSuccessEvent += (newGameMode, mirror) =>
+        private void Start()
+        {
+            gameModeController.OnGameModeChangeSuccessEvent += (newGameMode, mirror) =>
             {
-                StopFocus();
                 if (newGameMode == GameMode.TwoD)
                 {
                     Ignore3DLayer();
@@ -34,18 +39,12 @@ namespace Managers
                 }
                 else
                 {
+                    StopFocus();
                     StopIgnoring3DLayer();
                 }
             };
 
             player.OnTimeRewind += StartTimeShiftFX;
-        }
-
-        private void StopIgnoring3DLayer()
-        {
-            Physics.IgnoreLayerCollision(7, 9, false);
-            _camera.cullingMask = ~LayerMask.GetMask("PlayerReflection");
-            _cinemachineBrain.enabled = true;
         }
 
         private void SetupAberration()
@@ -64,23 +63,23 @@ namespace Managers
             _vignette.roundness.Override(0.2f);
         }
 
-        public void StartTimeShiftFX()
+        private void StartTimeShiftFX()
         {
+            _vignette = ScriptableObject.CreateInstance<Vignette>();
+            _vignette.enabled.Override(true);
+            _chromaticAberration.enabled.Override(true);
             StartCoroutine(TimeShiftFX());
         }
 
         private IEnumerator TimeShiftFX()
         {
-            _vignette = ScriptableObject.CreateInstance<Vignette>();
-            _vignette.enabled.Override(true);
-            _chromaticAberration.enabled.Override(true);
             while (_vignette.intensity.value > 0f || _chromaticAberration.intensity.value > 0f)
             {
                 _vignette.intensity.value -= 0.02f;
                 _chromaticAberration.intensity.value -= 0.0137f;
                 yield return new WaitForSeconds(0.1f);
             }
-
+            
             _vignette.enabled.Override(false);
             _vignette.intensity.Override(0.685f);
             _chromaticAberration.enabled.Override(false);
@@ -91,7 +90,12 @@ namespace Managers
         {
             _camera.cullingMask = LayerMask.GetMask("Default", "MirrorIgnore");
             _cinemachineBrain.enabled = false;
-            Physics.IgnoreLayerCollision(7, 9);
+        }
+
+        private void StopIgnoring3DLayer()
+        {
+            _camera.cullingMask = ~LayerMask.GetMask("PlayerReflection");
+            _cinemachineBrain.enabled = true;
         }
 
         private void AnimateCameraToMirror(Transform mirror)
