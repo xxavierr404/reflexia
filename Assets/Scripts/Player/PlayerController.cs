@@ -29,6 +29,7 @@ public class PlayerController : MonoBehaviour
     public IMovementStrategy MovementStrategy { get; set; }
     public GameMode GameMode { get; set; }
     public bool IsJumpBlocked { get; set; }
+    public bool IsMovementBlocked { get; set; }
 
     public OnKeyPressed OnJump { get; set; }
     public OnKeyPressed OnItemGrab { get; set; }
@@ -79,9 +80,12 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        var horizontal = Input.GetAxis("Horizontal");
-        var vertical = Input.GetAxis("Vertical");
-        var movementVector = new Vector3(horizontal, 0, vertical);
+        if (IsMovementBlocked) return;
+        
+        var movementVector = new Vector3(
+            Input.GetAxis("Horizontal"),
+            0, 
+            Input.GetAxis("Vertical"));
         OnMoveEvent?.Invoke(movementVector);
     }
 
@@ -116,7 +120,7 @@ public class PlayerController : MonoBehaviour
 
     private void Jump()
     {
-        if (JumpCount >= 2 || IsJumpBlocked) return;
+        if (JumpCount >= 2 || IsJumpBlocked || IsMovementBlocked) return;
         rigidBody.AddForce(Vector3.up * jumpMultiplyer, ForceMode.VelocityChange);
     }
     

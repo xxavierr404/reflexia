@@ -12,18 +12,17 @@ namespace Objects.Triggers
         [SerializeField] private SceneCrossfader crossfadeAnimator;
         [SerializeField] private bool disableCrossfade;
 
-        private delegate void OnSceneCrossfade();
-
-        private OnSceneCrossfade OnSceneCrossfadeEvent;
-        
-        private void Start()
+        private void OnTriggerEnter(Collider other)
         {
-            if (crossfadeAnimator != null)
-            {
-                OnSceneCrossfadeEvent += crossfadeAnimator.StartAnimation;
-            }
+            if (!other.CompareTag("Player")) return;
+            StartTrigger(0);
         }
 
+        public void StartTrigger(float delay)
+        {
+            StartCoroutine(SwitchScene(delay));
+        }
+        
         private IEnumerator SwitchScene(float delay)
         {
             yield return new WaitForSeconds(delay);
@@ -31,7 +30,7 @@ namespace Objects.Triggers
             {
                 if (!disableCrossfade)
                 {
-                    OnSceneCrossfadeEvent?.Invoke();
+                    crossfadeAnimator.StartAnimation();
                     yield return new WaitForSeconds(1.0f);
                 }
                 SceneManager.LoadScene(sceneId);

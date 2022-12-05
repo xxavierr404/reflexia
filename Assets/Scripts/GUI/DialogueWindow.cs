@@ -7,6 +7,8 @@ namespace GUI
 {
     public class DialogueWindow : MonoBehaviour
     {
+        private static DialogueWindow _instance;
+        
         [SerializeField] private GameObject dialoguePanel;
         [SerializeField] private Text dialogueName;
         [SerializeField] private Text dialogueText;
@@ -16,12 +18,21 @@ namespace GUI
         [SerializeField] private AudioClip letterSound;
         
         private Coroutine _scrollRoutine;
-        private bool _phraseFinished;
+        
         private static readonly int IsOpen = Animator.StringToHash("IsOpen");
+        
+        public bool PhraseFinished { get; private set; }
 
         private void Awake()
         {
+            _instance = this;
+            PhraseFinished = true;
             dialoguePanel.SetActive(false);
+        }
+
+        public static DialogueWindow GetInstance()
+        {
+            return _instance;
         }
 
         public void SetActive(bool active)
@@ -32,23 +43,19 @@ namespace GUI
 
         public void ShowPhrase(DialoguePhrase phrase)
         {
-            if (_scrollRoutine != null)
+            if (!PhraseFinished)
             {
-                StopCoroutine(_scrollRoutine);
-            } 
-            
-            if (!_phraseFinished)
-            {
+                StopAllCoroutines();
                 dialogueText.text = phrase.Text;
-                _phraseFinished = true;
+                PhraseFinished = true;
                 return;
             }
 
-            InitializeFromPhrase(phrase);
+            LoadPhrase(phrase);
             _scrollRoutine = StartCoroutine(ScrollText(phrase));
         }
 
-        private void InitializeFromPhrase(DialoguePhrase phrase)
+        private void LoadPhrase(DialoguePhrase phrase)
         {
             dialogueName.text = phrase.Name;
             if (phrase.Sprite)
@@ -61,7 +68,7 @@ namespace GUI
                 dialogueSprite.enabled = false;
             }
             _scrollRoutine = StartCoroutine(ScrollText(phrase));
-            _phraseFinished = false;
+            PhraseFinished = false;
         }
         
         private IEnumerator ScrollText(DialoguePhrase phrase)
@@ -69,13 +76,10 @@ namespace GUI
             for (var i = 0; i < phrase.Text.Length; i++)
             {
                 dialogueText.text = phrase.Text.Substring(0, i);
-                if (i == phrase.Text.Length - 1)
-                {
-                    _phraseFinished = true;
-                }
                 audioPlayer.PlayOneShot(letterSound);
                 yield return new WaitForSeconds(phrase.ScrollPause);
             }
+            PhraseFinished = true;
         }
         
         public void ResetWindow()

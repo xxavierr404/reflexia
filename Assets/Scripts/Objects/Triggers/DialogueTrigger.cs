@@ -3,83 +3,73 @@ using Ink.Runtime;
 using Misc;
 using UnityEngine;
 
-public class DialogueTrigger : MonoBehaviour
+namespace Objects.Triggers
 {
-    [SerializeField] private float textPause = 0.1f;
-    [SerializeField] private TextAsset script;
-    [SerializeField] private AudioClip letterSound;
-    [SerializeField] private DialogueWindow window;
-    
-    private DialoguePhrase _phrase;
-    private Story _story;
-    private float _currentPause;
-
-    public delegate void OnDialogueStart();
-    public delegate void OnDialogueContinue(DialoguePhrase phrase);
-    public delegate void OnDialogueEnd();
-
-    public OnDialogueStart OnDialogueStartEvent;
-    public OnDialogueContinue OnDialogueContinueEvent;
-    public OnDialogueEnd OnDialogueEndEvent;
-
-    private void Start()
+    public class DialogueTrigger : MonoBehaviour
     {
-        OnDialogueStartEvent += () => window.SetActive(true);
-        OnDialogueContinueEvent += (phrase) => window.ShowPhrase(phrase);
-        OnDialogueEndEvent += () =>
-        {
-            window.ResetWindow();
-            window.SetActive(false);
-        };
-    }
+        [SerializeField] private float textPause = 0.1f;
+        [SerializeField] private TextAsset script;
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
+        private DialogueWindow _window;
+        private DialoguePhrase _phrase;
+        private Story _story;
+
+        private void Start() {
+            _window = DialogueWindow.GetInstance();
+        }
+
+        private void OnTriggerEnter(Collider other)
         {
-            OnDialogueStartEvent?.Invoke();
-            
+            if (!other.CompareTag("Player")) return;
             var player = other.transform.GetComponent<PlayerController>();
-            player.IsJumpBlocked = true;
+            player.IsMovementBlocked = true;
             player.OnJump += ContinueDialogue;
-            Initialize(script, textPause);
+                
+            Initialize(script);
         }
-    }
 
-    private void Initialize(TextAsset inkScript, float pause)
-    {
-        _story = new Story(inkScript.text);
-        _currentPause = pause;
-        ContinueDialogue();
-    }
-
-    private void ContinueDialogue()
-    {
-        if (_story.canContinue)
+        private void Initialize(TextAsset inkScript)
         {
-            LoadPhrase();
-            OnDialogueContinueEvent?.Invoke(_phrase);
-            return;
+            _story = new Story(inkScript.text);
+            _window.SetActive(true);
+            ContinueDialogue();
         }
 
-        OnDialogueEndEvent?.Invoke();
-    }
-
-    private void LoadPhrase()
-    {
-        _phrase = new DialoguePhrase(_story.Continue(), _currentPause);
-        foreach (var spriteTag in _story.currentTags)
-            if (spriteTag.StartsWith("sprite"))
-                LoadSprite(spriteTag);
-    }
-    
+        private void ContinueDialogue()
+        {
+            if (!_window.PhraseFinished)
+            {
+                _window.ShowPhrase(_phrase);
+                return;
+            }
             
-    private void LoadSprite(string spriteTag)
-    {
-        var spriteID = spriteTag.Substring(7);
-        if (spriteID != "off")
+            if (_story.canContinue)
+            {
+                LoadPhrase();
+                _window.ShowPhrase(_phrase);
+                return;
+            }
+
+            _window.ResetWindow();
+            _window.SetActive(false);
+        }
+
+        private void LoadPhrase()
         {
-            _phrase.Sprite = Resources.Load<Sprite>(spriteID);
+            _phrase = new DialoguePhrase(_story.Continue(), textPause);
+            foreach (var spriteTag in _story.currentTags) {
+                if (spriteTag.StartsWith("sprite")) {
+                    LoadSprite(spriteTag);
+                }
+            }
+        }
+        
+        private void LoadSprite(string spriteTag)
+        {
+            var spriteID = spriteTag.Substring(7);
+            if (spriteID != "off") {
+                _phrase.Sprite = Resources.Load<Sprite>(spriteID);
+            }
         }
     }
 }

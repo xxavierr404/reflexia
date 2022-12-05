@@ -1,17 +1,20 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Playables;
-using UnityEngine.SceneManagement;
 
-public class CutsceneTrigger : MonoBehaviour
+namespace Objects.Triggers
 {
-    [SerializeField] private PlayableDirector cutscene;
-
-    private void OnTriggerEnter(Collider other)
+    public class CutsceneTrigger : MonoBehaviour
     {
-        if (other.CompareTag("Player"))
+        [SerializeField] private PlayableDirector cutscene;
+        [SerializeField] private SceneSwitchTrigger switchAfterCutscene;
+
+        private void OnTriggerEnter(Collider other)
         {
+            if (!other.CompareTag("Player")) return;
             cutscene.Play();
+
+            if (!switchAfterCutscene) return;
+            switchAfterCutscene.StartTrigger((float)cutscene.duration);
         }
     }
 }

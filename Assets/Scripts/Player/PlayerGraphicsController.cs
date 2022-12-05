@@ -29,6 +29,11 @@ namespace Player
 
             player.OnJump += () =>
             {
+                if (player.IsJumpBlocked)
+                {
+                    anim.SetBool(MidAir, false);
+                    return;
+                }
                 anim.SetBool(MidAir, true);
                 if (player.JumpCount == 1)
                 {
