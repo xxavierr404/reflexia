@@ -12,6 +12,8 @@ namespace GUI
         [SerializeField] private Text dialogueText;
         [SerializeField] private Image dialogueSprite;
         [SerializeField] private Animator animator;
+        [SerializeField] private AudioSource audioPlayer;
+        [SerializeField] private AudioClip letterSound;
         
         private Coroutine _scrollRoutine;
         private bool _phraseFinished;
@@ -22,11 +24,14 @@ namespace GUI
             dialoguePanel.SetActive(false);
         }
 
+        public void SetActive(bool active)
+        {
+            dialoguePanel.SetActive(active);
+            animator.SetBool(IsOpen, active);
+        }
+
         public void ShowPhrase(DialoguePhrase phrase)
         {
-            animator.SetBool(IsOpen, true);
-            dialoguePanel.SetActive(true);
-            
             if (_scrollRoutine != null)
             {
                 StopCoroutine(_scrollRoutine);
@@ -68,9 +73,18 @@ namespace GUI
                 {
                     _phraseFinished = true;
                 }
-                _audioPlayer.PlayOneShot(letterSound);
+                audioPlayer.PlayOneShot(letterSound);
                 yield return new WaitForSeconds(phrase.ScrollPause);
             }
+        }
+        
+        public void ResetWindow()
+        {
+            animator.SetBool(IsOpen, false);
+            dialoguePanel.SetActive(false);
+            dialogueName.text = "";
+            dialogueText.text = "";
+            dialogueSprite.sprite = null;
         }
     }
 }

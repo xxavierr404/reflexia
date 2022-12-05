@@ -52,7 +52,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetButtonDown("Jump") && JumpCount < 2 && !IsJumpBlocked)
+        if (Input.GetButtonDown("Jump"))
         {
             OnJump?.Invoke();
         }
@@ -116,6 +116,7 @@ public class PlayerController : MonoBehaviour
 
     private void Jump()
     {
+        if (JumpCount >= 2 || IsJumpBlocked) return;
         rigidBody.AddForce(Vector3.up * jumpMultiplyer, ForceMode.VelocityChange);
     }
     
