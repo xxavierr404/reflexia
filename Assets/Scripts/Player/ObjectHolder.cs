@@ -4,6 +4,8 @@ using UnityEngine;
 // ReSharper disable once CheckNamespace
 public class ObjectHolder : MonoBehaviour
 {
+    [SerializeField] private PlayerController controller;
+    
     private bool _moving;
     private MovableObject Movable { get; set; }
 
@@ -11,6 +13,15 @@ public class ObjectHolder : MonoBehaviour
     {
         Movable = null;
         _moving = false;
+        controller.OnItemGrab += () =>
+        {
+            if (controller.GameMode == GameMode.TwoD)
+            {
+                return;
+            }
+
+            ToggleHold();
+        };
     }
 
     private void Update()
@@ -32,10 +43,10 @@ public class ObjectHolder : MonoBehaviour
         Movable = null;
     }
 
-    public void ToggleHold()
+    private void ToggleHold()
     {
         if (_moving)
-            StopHolding();
+            Drop();
         else if (Movable) Hold();
     }
 
@@ -45,14 +56,16 @@ public class ObjectHolder : MonoBehaviour
         Movable.transform.position = parent.position;
         Movable.transform.SetParent(parent);
         Movable.Rigidbody.isKinematic = true;
+        
         _moving = true;
         Movable.gameObject.layer = 2;
     }
 
-    private void StopHolding()
+    private void Drop()
     {
         Movable.transform.SetParent(null);
         Movable.Rigidbody.isKinematic = false;
+
         _moving = false;
         Movable.gameObject.layer = 8;
         Movable = null;

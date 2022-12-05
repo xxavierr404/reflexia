@@ -102,13 +102,6 @@ public class PlayerController : MonoBehaviour
         {
             MovementStrategy.Move(movementVector, NearestMirror);
         };
-
-        OnItemGrab += () =>
-        {
-            if (GameMode == GameMode.TwoD) return;
-
-            holder.ToggleHold();
-        };
     }
 
     private void CheckJumpConditions()
