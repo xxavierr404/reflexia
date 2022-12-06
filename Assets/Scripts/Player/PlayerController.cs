@@ -80,8 +80,12 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (IsMovementBlocked) return;
-        
+        if (IsMovementBlocked)
+        {
+            OnMoveEvent?.Invoke(Vector3.zero);
+            return;
+        }
+
         var movementVector = new Vector3(
             Input.GetAxis("Horizontal"),
             0, 

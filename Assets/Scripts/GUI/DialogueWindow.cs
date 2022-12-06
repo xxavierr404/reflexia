@@ -9,17 +9,14 @@ namespace GUI
     {
         private static DialogueWindow _instance;
         
-        [SerializeField] private GameObject dialoguePanel;
         [SerializeField] private Text dialogueName;
         [SerializeField] private Text dialogueText;
         [SerializeField] private Image dialogueSprite;
         [SerializeField] private Animator animator;
         [SerializeField] private AudioSource audioPlayer;
         [SerializeField] private AudioClip letterSound;
-        
-        private Coroutine _scrollRoutine;
-        
-        private static readonly int IsOpen = Animator.StringToHash("IsOpen");
+
+        private static readonly int IsOnScreen = Animator.StringToHash("IsOnScreen");
         
         public bool PhraseFinished { get; private set; }
 
@@ -27,7 +24,7 @@ namespace GUI
         {
             _instance = this;
             PhraseFinished = true;
-            dialoguePanel.SetActive(false);
+            SetActive(false);
         }
 
         public static DialogueWindow GetInstance()
@@ -35,10 +32,9 @@ namespace GUI
             return _instance;
         }
 
-        public void SetActive(bool active)
-        {
-            dialoguePanel.SetActive(active);
-            animator.SetBool(IsOpen, active);
+        public void SetActive(bool active) {
+            gameObject.SetActive(active);
+            animator.SetBool(IsOnScreen, active);
         }
 
         public void ShowPhrase(DialoguePhrase phrase)
@@ -52,7 +48,6 @@ namespace GUI
             }
 
             LoadPhrase(phrase);
-            _scrollRoutine = StartCoroutine(ScrollText(phrase));
         }
 
         private void LoadPhrase(DialoguePhrase phrase)
@@ -67,7 +62,7 @@ namespace GUI
             {
                 dialogueSprite.enabled = false;
             }
-            _scrollRoutine = StartCoroutine(ScrollText(phrase));
+            StartCoroutine(ScrollText(phrase));
             PhraseFinished = false;
         }
         
@@ -84,8 +79,7 @@ namespace GUI
         
         public void ResetWindow()
         {
-            animator.SetBool(IsOpen, false);
-            dialoguePanel.SetActive(false);
+            SetActive(false);
             dialogueName.text = "";
             dialogueText.text = "";
             dialogueSprite.sprite = null;

@@ -14,6 +14,9 @@ namespace Objects.Triggers
         private DialoguePhrase _phrase;
         private Story _story;
 
+        private delegate void OnDialogueEnd();
+        private OnDialogueEnd _onDialogueEndEvent;
+        
         private void Start() {
             _window = DialogueWindow.GetInstance();
         }
@@ -21,10 +24,17 @@ namespace Objects.Triggers
         private void OnTriggerEnter(Collider other)
         {
             if (!other.CompareTag("Player")) return;
+            
             var player = other.transform.GetComponent<PlayerController>();
             player.IsMovementBlocked = true;
             player.OnJump += ContinueDialogue;
-                
+            _onDialogueEndEvent += () =>
+            {
+                _window.ResetWindow();
+                _window.SetActive(false);
+                player.IsMovementBlocked = false;
+            };    
+            
             Initialize(script);
         }
 
@@ -50,8 +60,7 @@ namespace Objects.Triggers
                 return;
             }
 
-            _window.ResetWindow();
-            _window.SetActive(false);
+            _onDialogueEndEvent?.Invoke();
         }
 
         private void LoadPhrase()
