@@ -1,33 +1,60 @@
-using System.Collections;
-using System.Collections.Generic;
+using Misc;
 using UnityEngine;
 
 public class Mirror : MonoBehaviour
 {
-    public RenderTexture mirrorTexture { get; private set; } //Текстура отражения зеркала
-    public Material mirrorMaterial { get; private set; }
-    private Camera mirrorCam; //Камера зеркала
-    private Vector3 lastRotation; //Предыдущее значение вращения (eulerAngles)
-    private Transform camTransform; //Камера игрока
+    private static readonly int MainTex = Shader.PropertyToID("_MainTex");
+    private Transform _camTransform;
+    private Vector3 _lastRotation;
+    private Camera _mirrorCam;
+    private Material _mirrorMaterial;
+    private RenderTexture _mirrorTexture;
+    private RenderTexture _previousTexture;
 
     private void Awake()
     {
-        camTransform = Camera.main.transform;
-        lastRotation = camTransform.eulerAngles;
-        mirrorCam = transform.Find("MirrorCam").GetComponent<Camera>();
-        mirrorCam.transform.localEulerAngles = new Vector3(0, 180 - transform.eulerAngles.y, 180); //Задание изначального поворота камеры
-        mirrorTexture = new RenderTexture(1024, 1024, 0); //Создание собственной текстуры для зеркала
-        mirrorCam.targetTexture = mirrorTexture; //Назначение текстуры зеркала как целевой текстуры камеры
-        mirrorMaterial = new Material(Shader.Find("Standard")); //Создание нового материала из стандартного шейдера
-        mirrorMaterial.SetTexture("_MainTex", mirrorTexture); //Задание текстуры новому материалу
-        transform.Find("Border").GetComponent<MeshRenderer>().material = mirrorMaterial; //Назначение новой текстуры рендереру "стекла" зеркала
-    }
-    void Update() //Вращение камеры вслед за камерой игрока
-    {
-        Vector3 delta = camTransform.eulerAngles - lastRotation;
-        delta.z = 0;
-        mirrorCam.transform.localEulerAngles += delta;
-        lastRotation = camTransform.eulerAngles;
+        _mirrorCam = transform.Find("MirrorCam").GetComponent<Camera>();
+        _camTransform = Camera.main.transform;
+        _lastRotation = _camTransform.eulerAngles;
+        _mirrorCam.transform.localEulerAngles =
+            new Vector3(0, 180 - transform.eulerAngles.y, 180);
+        InitializeTexture();
+        MirrorPooler.AddMirror(this);
     }
 
+    private void Update()
+    {
+        var eulerAngles = _camTransform.eulerAngles;
+        var delta = eulerAngles - _lastRotation;
+        delta.z = 0;
+        _mirrorCam.transform.localEulerAngles += delta;
+        _lastRotation = eulerAngles;
+    }
+
+    private void InitializeTexture()
+    {
+        _mirrorTexture = new RenderTexture(1024, 1024, 0);
+        _mirrorCam.targetTexture = _mirrorTexture;
+        _mirrorMaterial = new Material(Shader.Find("Standard"));
+        _mirrorMaterial.SetTexture(MainTex, _mirrorTexture);
+        transform.Find("Border").GetComponent<MeshRenderer>().material =
+            _mirrorMaterial;
+    }
+
+    public void Freeze()
+    {
+        _previousTexture = _mirrorTexture;
+        var freezeTexture = Utilities.ToTexture2D(_previousTexture);
+        _mirrorMaterial.SetTexture(MainTex, freezeTexture);
+    }
+
+    public void Unfreeze()
+    {
+        _mirrorMaterial.SetTexture(MainTex, _previousTexture);
+    }
+
+    public Camera GetCamera()
+    {
+        return _mirrorCam;
+    }
 }
