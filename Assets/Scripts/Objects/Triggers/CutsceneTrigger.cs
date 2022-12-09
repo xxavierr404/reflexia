@@ -14,7 +14,7 @@ namespace Objects.Triggers
             cutscene.Play();
 
             if (!switchAfterCutscene) return;
-            switchAfterCutscene.StartTrigger((float)cutscene.duration);
+            switchAfterCutscene.StartSwitchSceneCoroutine((float)cutscene.duration);
         }
     }
 }

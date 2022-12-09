@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using GUI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,10 +14,10 @@ namespace Objects.Triggers
         private void OnTriggerEnter(Collider other)
         {
             if (!other.CompareTag("Player")) return;
-            StartTrigger(0);
+            StartSwitchSceneCoroutine(0);
         }
 
-        public void StartTrigger(float delay)
+        public void StartSwitchSceneCoroutine(float delay)
         {
             StartCoroutine(SwitchScene(delay));
         }
@@ -26,15 +25,13 @@ namespace Objects.Triggers
         private IEnumerator SwitchScene(float delay)
         {
             yield return new WaitForSeconds(delay);
-            if (sceneId.Length != 0)
+            if (sceneId.Length == 0) yield break;
+            if (!disableCrossfade)
             {
-                if (!disableCrossfade)
-                {
-                    crossfadeAnimator.StartAnimation();
-                    yield return new WaitForSeconds(1.0f);
-                }
-                SceneManager.LoadScene(sceneId);
+                crossfadeAnimator.StartAnimation();
+                yield return new WaitForSeconds(1.0f);
             }
+            SceneManager.LoadScene(sceneId);
         }
     }
 }

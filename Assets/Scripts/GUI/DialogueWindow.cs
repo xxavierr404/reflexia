@@ -33,7 +33,6 @@ namespace GUI
         }
 
         public void SetActive(bool active) {
-            gameObject.SetActive(active);
             animator.SetBool(IsOnScreen, active);
         }
 
@@ -83,6 +82,7 @@ namespace GUI
             dialogueName.text = "";
             dialogueText.text = "";
             dialogueSprite.sprite = null;
+            dialogueSprite.enabled = false;
         }
     }
 }

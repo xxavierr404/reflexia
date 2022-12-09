@@ -26,11 +26,9 @@ public class ObjectHolder : MonoBehaviour
 
     private void Update()
     {
-        if (_moving)
-        {
-            var scroll = Input.GetAxis("Mouse ScrollWheel");
-            if (scroll > 0.1f) Movable.transform.Rotate(new Vector3(0, scroll * 45, 0));
-        }
+        if (!_moving) return;
+        var scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll > 0.1f) Movable.transform.Rotate(new Vector3(0, scroll * 45, 0));
     }
 
     private void OnTriggerEnter(Collider other)
@@ -47,7 +45,7 @@ public class ObjectHolder : MonoBehaviour
     {
         if (_moving)
             Drop();
-        else if (Movable) Hold();
+        else if (Movable && IsPositionReachable(Movable.transform.position, 1f)) Hold();
     }
 
     private void Hold()
@@ -55,19 +53,46 @@ public class ObjectHolder : MonoBehaviour
         var parent = transform;
         Movable.transform.position = parent.position;
         Movable.transform.SetParent(parent);
+        Movable.Collider.enabled = false;
         Movable.Rigidbody.isKinematic = true;
-        
+
         _moving = true;
         Movable.gameObject.layer = 2;
     }
 
     private void Drop()
     {
+        Movable.Collider.enabled = true;
+        var allowedToDrop = IsEnoughSpaceToDrop();
+        if (!allowedToDrop)
+        {
+            Movable.Collider.enabled = false;
+            return;
+        }
         Movable.transform.SetParent(null);
         Movable.Rigidbody.isKinematic = false;
 
         _moving = false;
         Movable.gameObject.layer = 8;
         Movable = null;
+    }
+
+    private bool IsPositionReachable(Vector3 position, float distance)
+    {
+        var playerPos = controller.transform.position;
+        return !Physics.Raycast(playerPos,
+            position - playerPos,
+            distance,
+            LayerMask.GetMask("Default"));
+    }
+
+    private bool IsEnoughSpaceToDrop()
+    {
+        var bounds = Movable.Collider.bounds;
+        var minPoint = bounds.min;
+        var maxPoint = bounds.max;
+        var playerPos = controller.transform.position;
+        return IsPositionReachable(minPoint, (minPoint - playerPos).magnitude)
+               && IsPositionReachable(maxPoint, (maxPoint - playerPos).magnitude);
     }
 }

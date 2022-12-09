@@ -7,17 +7,13 @@ namespace Objects
     [RequireComponent(typeof(Collider))]
     public class MovableObject : MonoBehaviour
     {
-        private Rigidbody _rigidbody;
+        public Rigidbody Rigidbody { get; private set; }
+        public Collider Collider { get; private set;  }
 
-        public Rigidbody Rigidbody => _rigidbody;
-        
         private void Awake()
         {
-            _rigidbody = GetComponent<Rigidbody>();
+            Rigidbody = GetComponent<Rigidbody>();
+            Collider = GetComponent<Collider>();
         }
-        
-        
-        
-        // TODO: Возврат объектов при коллизиях с препятствиями
     }
 }
